@@ -1,0 +1,2313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>GES Assessment Manager – NaCCA Framework</title>
+<style>
+:root{
+  --green:#1a6b3c;--green2:#22883f;--gold:#f5a623;--gold2:#fbbf24;
+  --dark:#0f1923;--dark2:#1a2535;--dark3:#243042;
+  --card:#1e2d40;--border:#2e4060;
+  --text:#e8f0fe;--muted:#7a94b0;
+  --red:#e53e3e;--blue:#3b82f6;--purple:#8b5cf6;
+  --font:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+  --radius:10px;--shadow:0 4px 20px rgba(0,0,0,0.4);
+}
+body.light{
+  --dark:#f0f4f8;--dark2:#e2e8f0;--dark3:#cbd5e0;
+  --card:#ffffff;--border:#c3d0e0;
+  --text:#1a2535;--muted:#4a6080;
+  --shadow:0 4px 20px rgba(0,0,0,0.12);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font);background:var(--dark);color:var(--text);min-height:100vh;transition:background .3s,color .3s;}
+h1,h2,h3,h4{line-height:1.2;}
+a{color:var(--gold);text-decoration:none;}
+button{cursor:pointer;font-family:var(--font);}
+input,select,textarea{font-family:var(--font);}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:var(--dark2);}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+/* ── AUTH SCREEN ── */
+#auth-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;
+  background:linear-gradient(135deg,var(--dark) 0%,var(--dark2) 100%);}
+.auth-box{background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:40px;width:100%;max-width:440px;box-shadow:var(--shadow);}
+.auth-logo{text-align:center;margin-bottom:28px;}
+.auth-logo .flag{font-size:2.5rem;margin-bottom:8px;}
+.auth-logo h1{color:var(--green2);font-size:1.5rem;margin-bottom:4px;}
+.auth-logo p{color:var(--muted);font-size:.85rem;}
+.auth-tabs{display:flex;background:var(--dark2);border-radius:8px;margin-bottom:24px;overflow:hidden;}
+.auth-tab{flex:1;padding:10px;text-align:center;background:none;border:none;color:var(--muted);font-size:.9rem;transition:all .2s;}
+.auth-tab.active{background:var(--green);color:#fff;font-weight:600;}
+.form-group{margin-bottom:16px;}
+.form-group label{display:block;font-size:.82rem;color:var(--muted);margin-bottom:6px;font-weight:500;}
+.form-control{width:100%;padding:10px 14px;background:var(--dark2);border:1px solid var(--border);
+  border-radius:8px;color:var(--text);font-size:.9rem;transition:border .2s;}
+.form-control:focus{outline:none;border-color:var(--green2);}
+.btn{padding:10px 20px;border:none;border-radius:8px;font-size:.9rem;font-weight:600;transition:all .2s;}
+.btn-primary{background:var(--green);color:#fff;width:100%;padding:12px;}
+.btn-primary:hover{background:var(--green2);}
+.btn-gold{background:var(--gold);color:#000;}
+.btn-gold:hover{background:var(--gold2);}
+.btn-danger{background:var(--red);color:#fff;}
+.btn-sm{padding:6px 14px;font-size:.82rem;}
+.btn-outline{background:none;border:1px solid var(--border);color:var(--text);}
+.btn-outline:hover{border-color:var(--green2);color:var(--green2);}
+.btn-icon{background:none;border:none;color:var(--muted);padding:4px 8px;border-radius:4px;font-size:1.1rem;}
+.btn-icon:hover{color:var(--text);background:var(--dark3);}
+
+/* ── MAIN APP ── */
+#app{display:none;flex-direction:column;min-height:100vh;}
+#app.visible{display:flex;}
+
+/* ── TOPBAR ── */
+.topbar{background:var(--dark2);border-bottom:1px solid var(--border);padding:0 20px;height:58px;
+  display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.topbar-left{display:flex;align-items:center;gap:12px;}
+.menu-btn{background:none;border:none;color:var(--text);font-size:1.4rem;padding:4px;display:none;}
+.topbar-brand{font-size:1.1rem;font-weight:700;color:var(--green2);}
+.topbar-sub{font-size:.75rem;color:var(--muted);}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.user-badge{background:var(--green);color:#fff;border-radius:50%;width:34px;height:34px;
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;}
+.session-info{font-size:.78rem;color:var(--muted);text-align:right;}
+
+/* ── LAYOUT ── */
+.app-body{display:flex;flex:1;overflow:hidden;}
+.sidebar{width:230px;background:var(--dark2);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;transition:transform .3s;overflow-y:auto;}
+.sidebar-nav{padding:12px 8px;flex:1;}
+.nav-section{margin-bottom:6px;}
+.nav-label{font-size:.7rem;color:var(--muted);padding:8px 12px 4px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;
+  cursor:pointer;color:var(--muted);font-size:.88rem;transition:all .2s;border:none;background:none;width:100%;text-align:left;}
+.nav-item:hover{background:var(--dark3);color:var(--text);}
+.nav-item.active{background:var(--green);color:#fff;font-weight:600;}
+.nav-item .icon{width:18px;text-align:center;flex-shrink:0;}
+.sidebar-footer{padding:12px;border-top:1px solid var(--border);}
+
+/* ── CONTENT ── */
+.content{flex:1;overflow-y:auto;padding:24px;}
+.page{display:none;}
+.page.active{display:block;}
+.page-header{margin-bottom:24px;}
+.page-title{font-size:1.5rem;font-weight:700;margin-bottom:4px;}
+.page-sub{color:var(--muted);font-size:.88rem;}
+
+/* ── CARDS ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;}
+.card-title{font-size:1rem;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.card-title .icon{color:var(--gold);}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:20px;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:16px;text-align:center;}
+.stat-value{font-size:1.8rem;font-weight:700;color:var(--gold);}
+.stat-label{font-size:.78rem;color:var(--muted);margin-top:4px;}
+
+/* ── TABLES ── */
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:.86rem;}
+th{background:var(--dark3);padding:10px 12px;text-align:left;font-weight:600;color:var(--muted);
+  font-size:.78rem;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;}
+td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:middle;}
+tr:hover td{background:var(--dark3);}
+.grade-badge{padding:2px 10px;border-radius:20px;font-weight:700;font-size:.8rem;display:inline-block;}
+.grade-A{background:#14532d;color:#4ade80;}
+.grade-B{background:#1e3a5f;color:#60a5fa;}
+.grade-C{background:#3b2f00;color:#fbbf24;}
+.grade-D{background:#2d1b69;color:#a78bfa;}
+.grade-E{background:#422006;color:#fb923c;}
+.grade-F{background:#450a0a;color:#f87171;}
+
+/* ── FORMS ── */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.form-row-3{grid-template-columns:1fr 1fr 1fr;}
+@media(max-width:600px){.form-row,.form-row-3{grid-template-columns:1fr;}}
+.form-actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
+
+/* ── MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;
+  align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:28px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;position:relative;}
+.modal-title{font-size:1.1rem;font-weight:700;margin-bottom:18px;}
+.modal-close{position:absolute;top:16px;right:16px;background:none;border:none;
+  color:var(--muted);font-size:1.3rem;cursor:pointer;}
+.modal-close:hover{color:var(--text);}
+.modal-actions{display:flex;gap:10px;margin-top:20px;justify-content:flex-end;}
+
+/* ── ALERTS ── */
+.toast-container{position:fixed;bottom:24px;right:24px;z-index:500;display:flex;flex-direction:column;gap:10px;}
+.toast{padding:12px 18px;border-radius:10px;font-size:.88rem;font-weight:500;
+  animation:slideIn .3s ease;box-shadow:var(--shadow);max-width:320px;}
+.toast.success{background:#14532d;color:#4ade80;border:1px solid #166534;}
+.toast.error{background:#450a0a;color:#f87171;border:1px solid #7f1d1d;}
+.toast.info{background:#1e3a5f;color:#93c5fd;border:1px solid #1d4ed8;}
+@keyframes slideIn{from{transform:translateX(120px);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* ── MISC ── */
+.badge{padding:2px 8px;border-radius:20px;font-size:.75rem;font-weight:600;}
+.badge-green{background:#14532d;color:#4ade80;}
+.badge-gold{background:#3b2000;color:#fbbf24;}
+.badge-blue{background:#1e3a5f;color:#60a5fa;}
+.badge-red{background:#450a0a;color:#f87171;}
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0;}
+.empty-state{text-align:center;padding:48px 20px;color:var(--muted);}
+.empty-state .empty-icon{font-size:3rem;margin-bottom:12px;}
+.empty-state p{margin-bottom:16px;}
+.search-bar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.search-bar input{flex:1;min-width:180px;}
+.inline-flex{display:flex;align-items:center;gap:8px;}
+.text-muted{color:var(--muted);}
+.text-right{text-align:right;}
+.mb-8{margin-bottom:8px;}
+.mb-16{margin-bottom:16px;}
+.progress-bar{height:6px;background:var(--dark3);border-radius:3px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:3px;transition:width .4s;}
+
+/* ── CHART CANVAS ── */
+.chart-wrap{position:relative;height:240px;margin-top:8px;}
+
+/* ── DARK MODE TOGGLE ── */
+.dark-toggle{background:var(--dark3);border:1px solid var(--border);border-radius:20px;
+  padding:4px 10px;color:var(--text);font-size:.8rem;cursor:pointer;display:flex;align-items:center;gap:6px;}
+
+/* ── PRINT ── */
+@media print{
+  .sidebar,.topbar,.no-print{display:none!important;}
+  .content{padding:0;}
+  body{background:#fff;color:#000;}
+  .card{border:1px solid #ccc;break-inside:avoid;}
+  .grade-A,.grade-B,.grade-C,.grade-D,.grade-E,.grade-F{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .menu-btn{display:block;}
+  .sidebar{position:fixed;top:58px;left:0;bottom:0;z-index:99;transform:translateX(-100%);}
+  .sidebar.open{transform:translateX(0);}
+  .content{padding:16px;}
+  .form-row{grid-template-columns:1fr;}
+}
+.overlay-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:90;}
+.overlay-bg.show{display:block;}
+
+/* ── LOG TABLE ── */
+.log-entry{font-size:.82rem;padding:6px 12px;border-bottom:1px solid var(--border);display:flex;gap:12px;}
+.log-entry .log-time{color:var(--muted);flex-shrink:0;width:140px;}
+.log-entry .log-action{flex:1;}
+.log-icon{width:24px;text-align:center;flex-shrink:0;}
+
+/* ── SCORE INPUT ── */
+.score-input{width:70px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;
+  background:var(--dark2);color:var(--text);text-align:center;font-size:.88rem;}
+.score-input:focus{outline:none;border-color:var(--green2);}
+
+/* ── NaCCA STRAND ── */
+.strand-tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.75rem;
+  background:var(--dark3);border:1px solid var(--border);margin:2px;}
+
+/* ── TABS ── */
+.tab-bar{display:flex;gap:4px;background:var(--dark2);padding:4px;border-radius:10px;margin-bottom:20px;flex-wrap:wrap;}
+.tab-btn{padding:7px 16px;border:none;border-radius:7px;background:none;color:var(--muted);font-size:.86rem;cursor:pointer;transition:all .2s;}
+.tab-btn.active{background:var(--green);color:#fff;font-weight:600;}
+.tab-pane{display:none;}
+.tab-pane.active{display:block;}
+
+/* ── LOCKED INDICATOR ── */
+.locked-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;
+  background:#3b2000;color:#fbbf24;font-size:.75rem;font-weight:600;}
+</style>
+</head>
+<body>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- AUTH SCREEN -->
+<div id="auth-screen">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <div class="flag">🇬🇭</div>
+      <h1>GES Assessment Manager</h1>
+      <p>NaCCA Framework · Basic &amp; SHS</p>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="showAuthTab('login')">Sign In</button>
+      <button class="auth-tab" onclick="showAuthTab('register')">Register</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="tab-login">
+      <div class="form-group">
+        <label>Email / Username</label>
+        <input type="text" id="loginEmail" class="form-control" placeholder="Enter your email"/>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="loginPass" class="form-control" placeholder="Enter password"/>
+      </div>
+      <button class="btn btn-primary" onclick="doLogin()">Sign In →</button>
+      <p style="text-align:center;margin-top:14px;font-size:.82rem;">
+        <a href="#" onclick="showAuthTab('reset')">Forgot password?</a>
+      </p>
+    </div>
+
+    <!-- REGISTER -->
+    <div id="tab-register" style="display:none;">
+      <div class="form-row">
+        <div class="form-group"><label>Full Name *</label>
+          <input type="text" id="regName" class="form-control" placeholder="Your full name"/></div>
+        <div class="form-group"><label>Role *</label>
+          <select id="regRole" class="form-control">
+            <option value="Class Teacher">Class Teacher</option>
+            <option value="Subject Teacher">Subject Teacher</option>
+            <option value="Head Teacher">Head Teacher</option>
+            <option value="ICT Coordinator">ICT Coordinator</option>
+          </select></div>
+      </div>
+      <div class="form-group"><label>School Name *</label>
+        <input type="text" id="regSchool" class="form-control" placeholder="e.g. Achimota School"/></div>
+      <div class="form-group"><label>Email / Username *</label>
+        <input type="text" id="regEmail" class="form-control" placeholder="Enter email or username"/></div>
+      <div class="form-row">
+        <div class="form-group"><label>Password *</label>
+          <input type="password" id="regPass" class="form-control" placeholder="Min. 6 characters"/></div>
+        <div class="form-group"><label>Confirm Password *</label>
+          <input type="password" id="regPass2" class="form-control" placeholder="Repeat password"/></div>
+      </div>
+      <button class="btn btn-primary" onclick="doRegister()">Create Account →</button>
+    </div>
+
+    <!-- RESET -->
+    <div id="tab-reset" style="display:none;">
+      <p style="color:var(--muted);font-size:.88rem;margin-bottom:16px;">Enter your registered email to reset your password locally.</p>
+      <div class="form-group"><label>Email / Username</label>
+        <input type="text" id="resetEmail" class="form-control"/></div>
+      <div class="form-group"><label>New Password</label>
+        <input type="password" id="resetPass" class="form-control"/></div>
+      <div class="form-group"><label>Secret PIN (set during registration)</label>
+        <input type="text" id="resetPin" class="form-control" placeholder="Leave blank if not set"/></div>
+      <div class="form-actions">
+        <button class="btn btn-primary" onclick="doReset()">Reset Password</button>
+        <button class="btn btn-outline" onclick="showAuthTab('login')">Back</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+      <div>
+        <div class="topbar-brand">🇬🇭 GES Assessment Manager</div>
+        <div class="topbar-sub" id="topSchoolInfo">NaCCA Framework</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="dark-toggle" onclick="toggleDark()">
+        <span id="darkIcon">☀️</span> <span id="darkLabel">Light</span>
+      </button>
+      <div>
+        <div class="user-badge" id="userInitials">T</div>
+      </div>
+      <div class="session-info">
+        <div id="sessionName" style="font-weight:600;color:var(--text);">Teacher</div>
+        <div id="sessionRole"></div>
+      </div>
+      <button class="btn btn-sm btn-outline no-print" onclick="doLogout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="app-body">
+    <div class="overlay-bg" id="overlayBg" onclick="closeSidebar()"></div>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar" id="sidebar">
+      <nav class="sidebar-nav">
+        <div class="nav-label">Main</div>
+        <button class="nav-item active" onclick="showPage('dashboard')">
+          <span class="icon">📊</span> Dashboard
+        </button>
+        <button class="nav-item" onclick="showPage('profile')">
+          <span class="icon">🏫</span> School Profile
+        </button>
+
+        <div class="nav-label" style="margin-top:8px;">Students</div>
+        <button class="nav-item" onclick="showPage('students')">
+          <span class="icon">👩🏾‍🎓</span> Students
+        </button>
+        <button class="nav-item" onclick="showPage('attendance')">
+          <span class="icon">📋</span> Attendance
+        </button>
+
+        <div class="nav-label" style="margin-top:8px;">Assessments</div>
+        <button class="nav-item" onclick="showPage('assessments')">
+          <span class="icon">📝</span> Assessments
+        </button>
+        <button class="nav-item" onclick="showPage('scores')">
+          <span class="icon">✏️</span> Enter Scores
+        </button>
+        <button class="nav-item" onclick="showPage('results')">
+          <span class="icon">🏆</span> Results
+        </button>
+        <button class="nav-item" onclick="showPage('analysis')">
+          <span class="icon">📈</span> Analysis
+        </button>
+
+        <div class="nav-label" style="margin-top:8px;">Reports</div>
+        <button class="nav-item" onclick="showPage('reports')">
+          <span class="icon">📄</span> PDF Reports
+        </button>
+        <button class="nav-item" onclick="showPage('broadsheet')">
+          <span class="icon">📑</span> Broadsheet
+        </button>
+
+        <div class="nav-label" style="margin-top:8px;">System</div>
+        <button class="nav-item" onclick="showPage('grading')">
+          <span class="icon">⚖️</span> Grading Scale
+        </button>
+        <button class="nav-item" onclick="showPage('backup')">
+          <span class="icon">💾</span> Backup &amp; Restore
+        </button>
+        <button class="nav-item" onclick="showPage('logs')">
+          <span class="icon">🕓</span> Activity Log
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <div style="font-size:.72rem;color:var(--muted);text-align:center;">
+          GES NaCCA Assessment Manager<br/>v2.0 · Offline Ready
+	<div style="text-align:center;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:.72rem;color:var(--muted);">
+  Developed by <strong style="color:var(--green2);">Samuel Kwame Dordzie</strong><br/>
+  <a href="mailto:bigsammy86g@gmail.com" style="color:var(--gold);">bigsammy86g@gmail.com</a>
+</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTENT AREA -->
+    <div class="content" id="mainContent">
+
+      <!-- ===== DASHBOARD ===== -->
+      <div class="page active" id="page-dashboard">
+        <div class="page-header">
+          <div class="page-title">Dashboard</div>
+          <div class="page-sub">Welcome back, <span id="dashTeacher">Teacher</span></div>
+        </div>
+        <div class="stat-grid" id="dashStats"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;" class="dash-grid">
+          <div class="card">
+            <div class="card-title"><span class="icon">🎓</span> School Info</div>
+            <div id="dashSchoolInfo" style="font-size:.88rem;color:var(--muted);">
+              Set up your school profile to see details here.
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title"><span class="icon">⚡</span> Quick Actions</div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <button class="btn btn-outline btn-sm" onclick="showPage('students')">➕ Add Students</button>
+              <button class="btn btn-outline btn-sm" onclick="showPage('assessments')">📝 New Assessment</button>
+              <button class="btn btn-outline btn-sm" onclick="showPage('scores')">✏️ Enter Scores</button>
+              <button class="btn btn-gold btn-sm" onclick="showPage('reports')">📄 Generate PDF</button>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:16px;">
+          <div class="card-title"><span class="icon">📊</span> Grade Distribution</div>
+          <div class="chart-wrap"><canvas id="dashChart"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="icon">🕓</span> Recent Activity</div>
+          <div id="recentLogs"></div>
+        </div>
+      </div>
+
+      <!-- ===== SCHOOL PROFILE ===== -->
+      <div class="page" id="page-profile">
+        <div class="page-header">
+          <div class="page-title">School Profile</div>
+          <div class="page-sub">These details appear on all reports and PDF exports</div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="icon">🏫</span> School Settings</div>
+          <div class="form-row">
+            <div class="form-group"><label>School Name *</label>
+              <input type="text" id="pSchool" class="form-control" placeholder="e.g. Achimota School"/></div>
+            <div class="form-group"><label>GES Region</label>
+              <select id="pRegion" class="form-control">
+                <option>Greater Accra</option><option>Ashanti</option><option>Western</option>
+                <option>Eastern</option><option>Central</option><option>Northern</option>
+                <option>Upper East</option><option>Upper West</option><option>Volta</option>
+                <option>Brong-Ahafo</option><option>Bono East</option><option>Ahafo</option>
+                <option>Western North</option><option>Oti</option><option>Savannah</option>
+                <option>North East</option>
+              </select></div>
+          </div>
+          <div class="form-row form-row-3">
+            <div class="form-group"><label>Academic Year *</label>
+              <input type="text" id="pYear" class="form-control" placeholder="2024/2025"/></div>
+            <div class="form-group"><label>Term *</label>
+              <select id="pTerm" class="form-control">
+                <option>Term 1</option><option>Term 2</option><option>Term 3</option>
+              </select></div>
+            <div class="form-group"><label>Level *</label>
+              <select id="pLevel" class="form-control" onchange="updateClassList()">
+                <option value="Basic">Basic (KG–JHS)</option>
+                <option value="SHS">SHS (Form 1–3)</option>
+              </select></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Class *</label>
+              <select id="pClass" class="form-control"></select></div>
+            <div class="form-group"><label>Subject *</label>
+              <input type="text" id="pSubject" class="form-control" placeholder="e.g. Mathematics"/></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>NaCCA Strand</label>
+              <input type="text" id="pStrand" class="form-control" placeholder="e.g. Number &amp; Operations"/></div>
+            <div class="form-group"><label>Sub-Strand</label>
+              <input type="text" id="pSubStrand" class="form-control" placeholder="e.g. Fractions"/></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>CA Weight (%)</label>
+              <input type="number" id="pCAWeight" class="form-control" value="30" min="0" max="100"/></div>
+            <div class="form-group"><label>Exam Weight (%)</label>
+              <input type="number" id="pExamWeight" class="form-control" value="70" min="0" max="100"/></div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-primary" onclick="saveProfile()">💾 Save Profile</button>
+            <button class="btn btn-outline" onclick="loadProfile()">↺ Reload</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== STUDENTS ===== -->
+      <div class="page" id="page-students">
+        <div class="page-header">
+          <div class="page-title">Student Management</div>
+          <div class="page-sub">Add, edit, and manage your class list</div>
+        </div>
+        <div class="card">
+          <div class="tab-bar">
+            <button class="tab-btn active" onclick="switchTab('students','add')">➕ Add Student</button>
+            <button class="tab-btn" onclick="switchTab('students','bulk')">📋 Bulk Upload</button>
+          </div>
+          <div class="tab-pane active" id="students-tab-add">
+            <div class="form-row form-row-3">
+              <div class="form-group"><label>Full Name *</label>
+                <input type="text" id="sName" class="form-control" placeholder="Student full name"/></div>
+              <div class="form-group"><label>Gender *</label>
+                <select id="sGender" class="form-control">
+                  <option value="Male">Male</option><option value="Female">Female</option>
+                </select></div>
+              <div class="form-group"><label>Index Number</label>
+                <input type="text" id="sIndex" class="form-control" placeholder="e.g. 0012345"/></div>
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-primary" onclick="addStudent()">Add Student</button>
+            </div>
+          </div>
+          <div class="tab-pane" id="students-tab-bulk">
+            <p style="font-size:.85rem;color:var(--muted);margin-bottom:10px;">
+              Paste student names (one per line). Format: <code>Name, Gender, IndexNo</code> (Gender &amp; Index optional)
+            </p>
+            <textarea id="bulkStudents" class="form-control" rows="8" placeholder="John Kwame Mensah, Male, 0012345&#10;Abena Asante, Female&#10;Kwesi Boateng, Male, 0012347"></textarea>
+            <div class="form-actions">
+              <button class="btn btn-primary" onclick="bulkAddStudents()">📥 Import Students</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="icon">👩🏾‍🎓</span> Class List <span id="studentCount" class="badge badge-blue" style="margin-left:auto;">0</span></div>
+          <div class="search-bar">
+            <input type="text" id="studentSearch" class="form-control" placeholder="🔍 Search student..." oninput="renderStudents()"/>
+            <select id="genderFilter" class="form-control" style="max-width:130px;" onchange="renderStudents()">
+              <option value="">All Genders</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+            </select>
+            <button class="btn btn-sm btn-outline" onclick="sortStudents()">⇅ Sort A-Z</button>
+          </div>
+          <div class="table-wrap"><table>
+            <thead><tr>
+              <th>#</th><th>Name</th><th>Gender</th><th>Index No.</th><th class="no-print">Actions</th>
+            </tr></thead>
+            <tbody id="studentTable"></tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- ===== ATTENDANCE ===== -->
+      <div class="page" id="page-attendance">
+        <div class="page-header">
+          <div class="page-title">Attendance Tracker</div>
+          <div class="page-sub">Mark daily attendance for your class</div>
+        </div>
+        <div class="card">
+          <div class="form-row">
+            <div class="form-group"><label>Date</label>
+              <input type="date" id="attDate" class="form-control"/></div>
+            <div class="form-group"><label>Session</label>
+              <select id="attSession" class="form-control">
+                <option>Morning</option><option>Afternoon</option>
+              </select></div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-primary" onclick="loadAttendanceSheet()">Load Sheet</button>
+          </div>
+        </div>
+        <div class="card" id="attendanceSheet" style="display:none;">
+          <div class="card-title"><span class="icon">📋</span> Attendance Sheet</div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>#</th><th>Student Name</th><th>Present</th><th>Absent</th><th>Remarks</th></tr></thead>
+              <tbody id="attendanceTable"></tbody>
+            </table>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-primary" onclick="saveAttendance()">💾 Save Attendance</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="icon">📊</span> Attendance Summary</div>
+          <div id="attendanceSummary"><div class="empty-state"><div class="empty-icon">📋</div><p>No attendance records yet</p></div></div>
+        </div>
+      </div>
+
+      <!-- ===== ASSESSMENTS ===== -->
+      <div class="page" id="page-assessments">
+        <div class="page-header">
+          <div class="page-title">Assessments</div>
+          <div class="page-sub">Create and manage assessment categories</div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="icon">📝</span> New Assessment</div>
+          <div class="form-row">
+            <div class="form-group"><label>Assessment Name *</label>
+              <input type="text" id="aName" class="form-control" placeholder="e.g. Class Exercise 1"/></div>
+            <div class="form-group"><label>Category *</label>
+              <select id="aCategory" class="form-control">
+                <option>Class Exercise</option><option>Quiz</option><option>Project Work</option>
+                <option>Midterm</option><option>Group Work</option><option>End of Term Exam</option>
+                <option>Homework</option><option>Custom</option>
+              </select></div>
+          </div>
+          <div class="form-row form-row-3">
+            <div class="form-group"><label>Total Marks *</label>
+              <input type="number" id="aTotal" class="form-control" placeholder="100" min="1"/></div>
+            <div class="form-group"><label>Type</label>
+              <select id="aType" class="form-control">
+                <option value="CA">Continuous Assessment (CA)</option>
+                <option value="Exam">Exam</option>
+              </select></div>
+            <div class="form-group"><label>Date</label>
+              <input type="date" id="aDate" class="form-control"/></div>
+          </div>
+          <div class="form-group"><label>Description (optional)</label>
+            <input type="text" id="aDesc" class="form-control" placeholder="Brief description of assessment"/></div>
+          <div class="form-actions">
+            <button class="btn btn-primary" onclick="addAssessment()">Create Assessment</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="icon">📋</span> Assessment List</div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>#</th><th>Name</th><th>Category</th><th>Type</th><th>Total</th><th>Date</th><th>Status</th><th class="no-print">Actions</th></tr></thead>
+            <tbody id="assessmentTable"></tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- ===== SCORES ===== -->
+      <div class="page" id="page-scores">
+        <div class="page-header">
+          <div class="page-title">Enter Scores</div>
+          <div class="page-sub">Input student scores for each assessment</div>
+        </div>
+        <div class="card">
+          <div class="form-row">
+            <div class="form-group"><label>Select Assessment *</label>
+              <select id="scoreAssessment" class="form-control" onchange="loadScoreSheet()">
+                <option value="">— Select an assessment —</option>
+              </select></div>
+          </div>
+        </div>
+        <div id="scoreSheetArea"></div>
+      </div>
+
+      <!-- ===== RESULTS ===== -->
+      <div class="page" id="page-results">
+        <div class="page-header">
+          <div class="page-title">Results</div>
+          <div class="page-sub">Overall student performance and rankings</div>
+        </div>
+        <div class="card">
+          <div class="form-row">
+            <div class="form-group"><label>Filter by Grade</label>
+              <select id="gradeFilter" class="form-control" onchange="renderResults()">
+                <option value="">All Grades</option>
+                <option value="A">A – Excellent</option>
+                <option value="B">B – Very Good</option>
+                <option value="C">C – Good</option>
+                <option value="D">D – Credit</option>
+                <option value="E">E – Pass</option>
+                <option value="F">F – Fail</option>
+              </select></div>
+            <div class="form-group"><label>Sort By</label>
+              <select id="resultSort" class="form-control" onchange="renderResults()">
+                <option value="position">Position</option>
+                <option value="name">Name (A-Z)</option>
+                <option value="score_desc">Score (High-Low)</option>
+                <option value="score_asc">Score (Low-High)</option>
+              </select></div>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="renderResults()">🔄 Refresh</button>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="icon">🏆</span> Results Table</div>
+          <div class="table-wrap"><table>
+            <thead><tr>
+              <th>Pos.</th><th>Name</th><th>Gender</th><th>Index No.</th>
+              <th>CA Score</th><th>Exam Score</th><th>Total %</th><th>Grade</th><th>Remarks</th>
+            </tr></thead>
+            <tbody id="resultsTable"></tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- ===== ANALYSIS ===== -->
+      <div class="page" id="page-analysis">
+        <div class="page-header">
+          <div class="page-title">Performance Analysis</div>
+          <div class="page-sub">Automated insights and statistics</div>
+        </div>
+        <div class="stat-grid" id="analysisStats"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div class="card">
+            <div class="card-title"><span class="icon">📊</span> Grade Distribution</div>
+            <div class="chart-wrap"><canvas id="gradeChart"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><span class="icon">📈</span> Score Distribution</div>
+            <div class="chart-wrap"><canvas id="scoreChart"></canvas></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="icon">⚥</span> Gender Performance</div>
+          <div class="chart-wrap"><canvas id="genderChart"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="icon">💡</span> Performance Summary</div>
+          <div id="perfSummary"></div>
+        </div>
+      </div>
+
+      <!-- ===== REPORTS ===== -->
+      <div class="page" id="page-reports">
+        <div class="page-header">
+          <div class="page-title">PDF Reports</div>
+          <div class="page-sub">Generate and download professional assessment reports</div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="icon">📄</span> Report Options</div>
+          <div class="form-row">
+            <div class="form-group"><label>Report Type</label>
+              <select id="reportType" class="form-control">
+                <option value="individual">Individual Student Report</option>
+                <option value="class">Class Summary Report</option>
+                <option value="broadsheet">Full Broadsheet</option>
+              </select></div>
+            <div class="form-group"><label>Select Student (for Individual)</label>
+              <select id="reportStudent" class="form-control">
+                <option value="">All Students</option>
+              </select></div>
+          </div>
+          <div class="form-group"><label>Additional Notes (optional)</label>
+            <textarea id="reportNotes" class="form-control" rows="3" placeholder="Any additional comments for this report..."></textarea></div>
+          <div class="form-actions">
+            <button class="btn btn-primary" onclick="generatePDF()">📥 Download PDF</button>
+            <button class="btn btn-gold" onclick="printReport()">🖨️ Print Report</button>
+          </div>
+        </div>
+        <div class="card" id="reportPreview">
+          <div class="card-title"><span class="icon">👁️</span> Report Preview</div>
+          <div id="reportPreviewContent"></div>
+        </div>
+      </div>
+
+      <!-- ===== BROADSHEET ===== -->
+      <div class="page" id="page-broadsheet">
+        <div class="page-header">
+          <div class="page-title">Broadsheet View</div>
+          <div class="page-sub">Complete assessment record for all students</div>
+        </div>
+        <div class="card no-print">
+          <button class="btn btn-primary" onclick="renderBroadsheet()">🔄 Generate Broadsheet</button>
+          <button class="btn btn-gold" onclick="exportBroadsheetCSV()" style="margin-left:10px;">📊 Export CSV</button>
+          <button class="btn btn-outline" onclick="printReport()" style="margin-left:10px;">🖨️ Print</button>
+        </div>
+        <div class="card" id="broadsheetCard">
+          <div id="broadsheetContent"></div>
+        </div>
+      </div>
+
+      <!-- ===== GRADING SCALE ===== -->
+      <div class="page" id="page-grading">
+        <div class="page-header">
+          <div class="page-title">Grading Scale</div>
+          <div class="page-sub">Customize Ghana NaCCA grading boundaries</div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="icon">⚖️</span> Grade Boundaries</div>
+          <p style="font-size:.85rem;color:var(--muted);margin-bottom:16px;">Adjust the minimum score for each grade level below.</p>
+          <div id="gradingTable"></div>
+          <div class="form-actions">
+            <button class="btn btn-primary" onclick="saveGrading()">💾 Save Scale</button>
+            <button class="btn btn-outline" onclick="resetGrading()">↺ Reset to Default</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="icon">💬</span> Comment Bank</div>
+          <p style="font-size:.85rem;color:var(--muted);margin-bottom:12px;">Automatic remarks for each grade level.</p>
+          <div id="commentBank"></div>
+          <div class="form-actions">
+            <button class="btn btn-primary" onclick="saveComments()">💾 Save Comments</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== BACKUP ===== -->
+      <div class="page" id="page-backup">
+        <div class="page-header">
+          <div class="page-title">Backup &amp; Restore</div>
+          <div class="page-sub">Export and import your assessment data</div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="icon">📤</span> Export Backup</div>
+          <p style="font-size:.85rem;color:var(--muted);margin-bottom:14px;">
+            Download a complete JSON backup of all your data including students, assessments, scores, and settings.
+          </p>
+          <div id="backupInfo" style="font-size:.83rem;color:var(--muted);margin-bottom:12px;"></div>
+          <div class="form-actions">
+            <button class="btn btn-primary" onclick="exportBackup()">📥 Download Backup (JSON)</button>
+            <button class="btn btn-outline" onclick="exportCSV()">📊 Export Results CSV</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="icon">📥</span> Import Backup</div>
+          <p style="font-size:.85rem;color:var(--muted);margin-bottom:12px;">
+            ⚠️ Importing will replace all current data. Make sure to export first.
+          </p>
+          <div class="form-group"><label>Select Backup File (.json)</label>
+            <input type="file" id="importFile" class="form-control" accept=".json"/></div>
+          <div class="form-actions">
+            <button class="btn btn-gold" onclick="importBackup()">📂 Import &amp; Restore</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="icon">🗑️</span> Danger Zone</div>
+          <p style="font-size:.85rem;color:var(--muted);margin-bottom:12px;">These actions cannot be undone.</p>
+          <div class="form-actions">
+            <button class="btn btn-danger btn-sm" onclick="clearAllData()">🗑️ Clear All Data</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== ACTIVITY LOG ===== -->
+      <div class="page" id="page-logs">
+        <div class="page-header">
+          <div class="page-title">Activity Log</div>
+          <div class="page-sub">Complete record of all system activities</div>
+        </div>
+        <div class="card no-print">
+          <div class="inline-flex">
+            <button class="btn btn-sm btn-outline" onclick="exportLogs()">📥 Export Logs</button>
+            <button class="btn btn-sm btn-danger" onclick="clearLogs()">🗑️ Clear Logs</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="icon">🕓</span> Log Entries</div>
+          <div id="logList"></div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /app-body -->
+</div><!-- /app -->
+
+<!-- EDIT STUDENT MODAL -->
+<div class="modal-overlay" id="editStudentModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('editStudentModal')">✕</button>
+    <div class="modal-title">✏️ Edit Student</div>
+    <input type="hidden" id="editStudentIdx"/>
+    <div class="form-group"><label>Full Name</label>
+      <input type="text" id="editStudentName" class="form-control"/></div>
+    <div class="form-row">
+      <div class="form-group"><label>Gender</label>
+        <select id="editStudentGender" class="form-control">
+          <option value="Male">Male</option><option value="Female">Female</option>
+        </select></div>
+      <div class="form-group"><label>Index Number</label>
+        <input type="text" id="editStudentIndex" class="form-control"/></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('editStudentModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEditStudent()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT ASSESSMENT MODAL -->
+<div class="modal-overlay" id="editAssessmentModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('editAssessmentModal')">✕</button>
+    <div class="modal-title">✏️ Edit Assessment</div>
+    <input type="hidden" id="editAssessmentIdx"/>
+    <div class="form-group"><label>Assessment Name</label>
+      <input type="text" id="editAssessmentName" class="form-control"/></div>
+    <div class="form-row">
+      <div class="form-group"><label>Category</label>
+        <select id="editAssessmentCategory" class="form-control">
+          <option>Class Exercise</option><option>Quiz</option><option>Project Work</option>
+          <option>Midterm</option><option>Group Work</option><option>End of Term Exam</option>
+          <option>Custom</option>
+        </select></div>
+      <div class="form-group"><label>Total Marks</label>
+        <input type="number" id="editAssessmentTotal" class="form-control"/></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('editAssessmentModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEditAssessment()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal" style="max-width:380px;">
+    <div class="modal-title">⚠️ Confirm Action</div>
+    <p id="confirmMessage" style="color:var(--muted);font-size:.9rem;margin-bottom:20px;"></p>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('confirmModal')">Cancel</button>
+      <button class="btn btn-danger" id="confirmOkBtn">Yes, Proceed</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  GES NaCCA Assessment Manager · v2.0
+//  Single-file offline application
+// ═══════════════════════════════════════════════════════
+
+// ── SHA-256 (pure JS, no external lib needed) ──
+async function sha256(msg){
+  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(msg));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+// ── STATE ──
+let APP={
+  currentUser:null,
+  students:[],
+  assessments:[],
+  scores:{},        // {assessmentId:{studentIdx:score}}
+  attendance:{},    // {date_session:[{studentIdx,present,remark}]}
+  profile:{},
+  grading:[
+    {grade:'A',label:'Excellent',min:80,max:100,color:'#4ade80'},
+    {grade:'B',label:'Very Good',min:70,max:79,color:'#60a5fa'},
+    {grade:'C',label:'Good',min:60,max:69,color:'#fbbf24'},
+    {grade:'D',label:'Credit',min:50,max:59,color:'#a78bfa'},
+    {grade:'E',label:'Pass',min:40,max:49,color:'#fb923c'},
+    {grade:'F',label:'Fail',min:0,max:39,color:'#f87171'},
+  ],
+  comments:{
+    A:'Excellent performance. Keep up the outstanding work!',
+    B:'Very good performance. Continue to strive for excellence.',
+    C:'Good performance. Some areas need improvement.',
+    D:'Satisfactory performance. More effort is required.',
+    E:'Barely passed. Significant improvement is needed.',
+    F:'Unsatisfactory performance. Needs urgent attention and support.',
+  },
+  logs:[],
+  darkMode:false,
+  version:'2.0',
+};
+
+// Charts storage
+let charts={};
+
+// ── UTILS ──
+function ls(k,v){if(v===undefined)return JSON.parse(localStorage.getItem(k)||'null');localStorage.setItem(k,JSON.stringify(v));}
+function toast(msg,type='success'){
+  const d=document.createElement('div');
+  d.className=`toast ${type}`;d.textContent=msg;
+  document.getElementById('toastContainer').appendChild(d);
+  setTimeout(()=>d.remove(),3500);
+}
+function confirm2(msg,cb){
+  document.getElementById('confirmMessage').textContent=msg;
+  document.getElementById('confirmOkBtn').onclick=()=>{closeModal('confirmModal');cb();};
+  openModal('confirmModal');
+}
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function eid(id){return document.getElementById(id);}
+function logActivity(action,icon='📌'){
+  const now=new Date();
+  APP.logs.unshift({
+    time:now.toLocaleString(),ts:now.getTime(),
+    action,icon,user:APP.currentUser?.name||'Unknown'
+  });
+  if(APP.logs.length>200)APP.logs.pop();
+  saveAppData();
+}
+
+// ── AUTH ──
+function showAuthTab(tab){
+  ['login','register','reset'].forEach(t=>{
+    eid('tab-'+t).style.display=t===tab?'block':'none';
+  });
+  document.querySelectorAll('.auth-tab').forEach((btn,i)=>{
+    btn.classList.toggle('active',['login','register'].indexOf(tab)===i);
+  });
+}
+
+async function doRegister(){
+  const name=eid('regName').value.trim();
+  const school=eid('regSchool').value.trim();
+  const email=eid('regEmail').value.trim();
+  const pass=eid('regPass').value;
+  const pass2=eid('regPass2').value;
+  const role=eid('regRole').value;
+  if(!name||!school||!email||!pass){return toast('All required fields must be filled.','error');}
+  if(pass!==pass2){return toast('Passwords do not match.','error');}
+  if(pass.length<6){return toast('Password must be at least 6 characters.','error');}
+  let users=ls('ges_users')||[];
+  if(users.find(u=>u.email===email)){return toast('User already exists with that email.','error');}
+  const hash=await sha256(pass);
+  users.push({name,school,email,role,hash,created:new Date().toISOString()});
+  ls('ges_users',users);
+  toast('Account created! Please sign in.','success');
+  showAuthTab('login');
+  eid('loginEmail').value=email;
+}
+
+async function doLogin(){
+  const email=eid('loginEmail').value.trim();
+  const pass=eid('loginPass').value;
+  if(!email||!pass){return toast('Enter email and password.','error');}
+  let users=ls('ges_users')||[];
+  const user=users.find(u=>u.email===email);
+  if(!user){return toast('No account found with that email.','error');}
+  const hash=await sha256(pass);
+  if(hash!==user.hash){return toast('Incorrect password.','error');}
+  APP.currentUser=user;
+  ls('ges_session',user.email);
+  startApp();
+  logActivity(`Logged in as ${user.name}`,'🔓');
+}
+
+async function doReset(){
+  const email=eid('resetEmail').value.trim();
+  const newPass=eid('resetPass').value;
+  if(!email||!newPass){return toast('Fill all fields.','error');}
+  let users=ls('ges_users')||[];
+  const idx=users.findIndex(u=>u.email===email);
+  if(idx<0){return toast('No account found.','error');}
+  users[idx].hash=await sha256(newPass);
+  ls('ges_users',users);
+  toast('Password reset successfully!','success');
+  showAuthTab('login');
+}
+
+function doLogout(){
+  confirm2('Are you sure you want to log out?',()=>{
+    logActivity(`Logged out`,'🔒');
+    APP.currentUser=null;
+    ls('ges_session',null);
+    eid('app').classList.remove('visible');
+    eid('auth-screen').style.display='flex';
+  });
+}
+
+function autoLogin(){
+  const email=ls('ges_session');
+  if(!email)return false;
+  const users=ls('ges_users')||[];
+  const user=users.find(u=>u.email===email);
+  if(user){APP.currentUser=user;return true;}
+  return false;
+}
+
+// ── APP START ──
+function startApp(){
+  eid('auth-screen').style.display='none';
+  eid('app').classList.add('visible');
+  loadAppData();
+  updateTopbar();
+  updateClassList();
+  loadProfile();
+  renderDashboard();
+  renderStudents();
+  renderAssessmentDropdown();
+  renderResults();
+  renderBroadsheet();
+  renderGradingTable();
+  renderCommentBank();
+  renderLogs();
+  renderAttendanceSummary();
+  updateReportStudentSelect();
+  setTodayDate();
+}
+
+function setTodayDate(){
+  const today=new Date().toISOString().split('T')[0];
+  if(eid('aDate'))eid('aDate').value=today;
+  if(eid('attDate'))eid('attDate').value=today;
+}
+
+// ── DATA PERSISTENCE ──
+function saveAppData(){
+  ls('ges_data',{
+    students:APP.students,
+    assessments:APP.assessments,
+    scores:APP.scores,
+    attendance:APP.attendance,
+    profile:APP.profile,
+    grading:APP.grading,
+    comments:APP.comments,
+    logs:APP.logs,
+    darkMode:APP.darkMode,
+    savedAt:new Date().toISOString(),
+    version:APP.version,
+  });
+}
+
+function loadAppData(){
+  const d=ls('ges_data');
+  if(d){
+    APP.students=d.students||[];
+    APP.assessments=d.assessments||[];
+    APP.scores=d.scores||{};
+    APP.attendance=d.attendance||{};
+    APP.profile=d.profile||{};
+    APP.logs=d.logs||[];
+    if(d.grading)APP.grading=d.grading;
+    if(d.comments)APP.comments=d.comments;
+    if(d.darkMode)setDark(true);
+  }
+}
+
+// ── DARK MODE ──
+function setDark(on){
+  APP.darkMode=on;
+  document.body.classList.toggle('light',!on);
+  eid('darkIcon').textContent=on?'☀️':'🌙';
+  eid('darkLabel').textContent=on?'Light':'Dark';
+  saveAppData();
+}
+function toggleDark(){setDark(!APP.darkMode);}
+
+// ── TOPBAR ──
+function updateTopbar(){
+  const u=APP.currentUser;
+  if(!u)return;
+  eid('userInitials').textContent=(u.name||'T').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+  eid('sessionName').textContent=u.name||'Teacher';
+  eid('sessionRole').textContent=u.role||'';
+  const p=APP.profile;
+  if(p.school){
+    eid('topSchoolInfo').textContent=`${p.school} · ${p.term||''} ${p.year||''}`;
+  }
+}
+
+// ── NAVIGATION ──
+function showPage(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const target=eid('page-'+page);
+  if(target)target.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>{
+    if(n.getAttribute('onclick')===`showPage('${page}')`)n.classList.add('active');
+  });
+  closeSidebar();
+  // Refresh pages
+  if(page==='dashboard')renderDashboard();
+  if(page==='results')renderResults();
+  if(page==='analysis'){renderAnalysis();}
+  if(page==='broadsheet')renderBroadsheet();
+  if(page==='scores')renderAssessmentDropdown();
+  if(page==='reports')updateReportStudentSelect();
+  if(page==='logs')renderLogs();
+  if(page==='grading'){renderGradingTable();renderCommentBank();}
+  if(page==='backup')renderBackupInfo();
+  if(page==='attendance')renderAttendanceSummary();
+}
+
+function toggleSidebar(){
+  eid('sidebar').classList.toggle('open');
+  eid('overlayBg').classList.toggle('show');
+}
+function closeSidebar(){
+  eid('sidebar').classList.remove('open');
+  eid('overlayBg').classList.remove('show');
+}
+
+function switchTab(group,tab){
+  document.querySelectorAll(`#page-${group} .tab-btn`).forEach((b,i)=>{
+    b.classList.toggle('active',b.getAttribute('onclick').includes(`'${tab}'`));
+  });
+  document.querySelectorAll(`#page-${group} .tab-pane`).forEach(p=>{
+    p.classList.toggle('active',p.id===`${group}-tab-${tab}`);
+  });
+}
+
+// ── PROFILE ──
+function updateClassList(){
+  const level=eid('pLevel')?.value||'Basic';
+  const classes=level==='SHS'
+    ?['SHS 1A','SHS 1B','SHS 1C','SHS 2A','SHS 2B','SHS 2C','SHS 3A','SHS 3B','SHS 3C','Form 1','Form 2','Form 3']
+    :['KG 1','KG 2','Class 1','Class 2','Class 3','Class 4','Class 5','Class 6','JHS 1','JHS 2','JHS 3','JHS 1A','JHS 1B','JHS 2A','JHS 2B','JHS 3A','JHS 3B'];
+  const sel=eid('pClass');
+  if(!sel)return;
+  sel.innerHTML=classes.map(c=>`<option value="${c}">${c}</option>`).join('');
+  const p=APP.profile;
+  if(p.class&&classes.includes(p.class))sel.value=p.class;
+}
+
+function saveProfile(){
+  APP.profile={
+    school:eid('pSchool').value.trim(),
+    region:eid('pRegion').value,
+    year:eid('pYear').value.trim(),
+    term:eid('pTerm').value,
+    level:eid('pLevel').value,
+    class:eid('pClass').value,
+    subject:eid('pSubject').value.trim(),
+    strand:eid('pStrand').value.trim(),
+    substrand:eid('pSubStrand').value.trim(),
+    caWeight:parseInt(eid('pCAWeight').value)||30,
+    examWeight:parseInt(eid('pExamWeight').value)||70,
+    teacher:APP.currentUser?.name||'',
+    school_of_teacher:APP.currentUser?.school||'',
+  };
+  saveAppData();
+  updateTopbar();
+  toast('School profile saved!','success');
+  logActivity('School profile updated','🏫');
+}
+
+function loadProfile(){
+  const p=APP.profile;
+  if(eid('pSchool'))eid('pSchool').value=p.school||APP.currentUser?.school||'';
+  if(eid('pRegion')&&p.region)eid('pRegion').value=p.region;
+  if(eid('pYear'))eid('pYear').value=p.year||'2024/2025';
+  if(eid('pTerm')&&p.term)eid('pTerm').value=p.term;
+  if(eid('pLevel')&&p.level)eid('pLevel').value=p.level;
+  updateClassList();
+  if(eid('pSubject'))eid('pSubject').value=p.subject||'';
+  if(eid('pStrand'))eid('pStrand').value=p.strand||'';
+  if(eid('pSubStrand'))eid('pSubStrand').value=p.substrand||'';
+  if(eid('pCAWeight'))eid('pCAWeight').value=p.caWeight||30;
+  if(eid('pExamWeight'))eid('pExamWeight').value=p.examWeight||70;
+}
+
+// ── STUDENTS ──
+function addStudent(){
+  const name=eid('sName').value.trim();
+  const gender=eid('sGender').value;
+  const index=eid('sIndex').value.trim();
+  if(!name){return toast('Student name is required.','error');}
+  if(APP.students.find(s=>s.name.toLowerCase()===name.toLowerCase())){
+    return toast('A student with this name already exists.','error');
+  }
+  APP.students.push({name,gender,index:index||'',id:Date.now()});
+  saveAppData();
+  eid('sName').value='';eid('sIndex').value='';
+  renderStudents();
+  updateReportStudentSelect();
+  toast(`${name} added successfully.`,'success');
+  logActivity(`Added student: ${name}`,'👩🏾‍🎓');
+}
+
+function bulkAddStudents(){
+  const raw=eid('bulkStudents').value.trim();
+  if(!raw){return toast('Paste student list first.','error');}
+  const lines=raw.split('\n').filter(l=>l.trim());
+  let added=0,skipped=0;
+  lines.forEach(line=>{
+    const parts=line.split(',').map(p=>p.trim());
+    const name=parts[0];const gender=parts[1]||'Male';const index=parts[2]||'';
+    if(!name){skipped++;return;}
+    if(APP.students.find(s=>s.name.toLowerCase()===name.toLowerCase())){skipped++;return;}
+    const validGender=['Male','Female'].includes(gender)?gender:'Male';
+    APP.students.push({name,gender:validGender,index,id:Date.now()+Math.random()});
+    added++;
+  });
+  saveAppData();
+  eid('bulkStudents').value='';
+  renderStudents();
+  updateReportStudentSelect();
+  toast(`Added ${added} students. Skipped ${skipped}.`,'success');
+  logActivity(`Bulk imported ${added} students`,'📋');
+}
+
+function sortStudents(){
+  APP.students.sort((a,b)=>a.name.localeCompare(b.name));
+  saveAppData();renderStudents();
+}
+
+function renderStudents(){
+  const q=(eid('studentSearch')?.value||'').toLowerCase();
+  const gf=eid('genderFilter')?.value||'';
+  const filtered=APP.students.filter(s=>
+    s.name.toLowerCase().includes(q)&&(!gf||s.gender===gf)
+  );
+  const tbody=eid('studentTable');
+  eid('studentCount').textContent=APP.students.length;
+  if(!filtered.length){
+    tbody.innerHTML=`<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">👩🏾‍🎓</div><p>No students found</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML=filtered.map((s,i)=>{
+    const realIdx=APP.students.indexOf(s);
+    return`<tr>
+      <td>${i+1}</td>
+      <td><strong>${s.name}</strong></td>
+      <td><span class="badge ${s.gender==='Female'?'badge-gold':'badge-blue'}">${s.gender}</span></td>
+      <td>${s.index||'—'}</td>
+      <td class="no-print">
+        <button class="btn-icon" onclick="openEditStudent(${realIdx})" title="Edit">✏️</button>
+        <button class="btn-icon" onclick="deleteStudent(${realIdx})" title="Delete">🗑️</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function openEditStudent(idx){
+  const s=APP.students[idx];
+  eid('editStudentIdx').value=idx;
+  eid('editStudentName').value=s.name;
+  eid('editStudentGender').value=s.gender;
+  eid('editStudentIndex').value=s.index||'';
+  openModal('editStudentModal');
+}
+
+function saveEditStudent(){
+  const idx=parseInt(eid('editStudentIdx').value);
+  const name=eid('editStudentName').value.trim();
+  if(!name){return toast('Name is required.','error');}
+  APP.students[idx]={...APP.students[idx],name,gender:eid('editStudentGender').value,index:eid('editStudentIndex').value.trim()};
+  saveAppData();closeModal('editStudentModal');renderStudents();
+  toast('Student updated.','success');
+  logActivity(`Edited student: ${name}`,'✏️');
+}
+
+function deleteStudent(idx){
+  const s=APP.students[idx];
+  confirm2(`Delete ${s.name} from the class list? This cannot be undone.`,()=>{
+    APP.students.splice(idx,1);
+    saveAppData();renderStudents();updateReportStudentSelect();
+    toast('Student deleted.','info');
+    logActivity(`Deleted student: ${s.name}`,'🗑️');
+  });
+}
+
+// ── ASSESSMENTS ──
+function addAssessment(){
+  const name=eid('aName').value.trim();
+  const category=eid('aCategory').value;
+  const total=parseInt(eid('aTotal').value);
+  const type=eid('aType').value;
+  const date=eid('aDate').value;
+  const desc=eid('aDesc').value.trim();
+  if(!name||!total){return toast('Name and total marks are required.','error');}
+  if(total<1){return toast('Total marks must be at least 1.','error');}
+  const id='a_'+Date.now();
+  APP.assessments.push({id,name,category,total,type,date,desc,locked:false,created:new Date().toISOString()});
+  APP.scores[id]={};
+  saveAppData();renderAssessmentTable();renderAssessmentDropdown();
+  eid('aName').value='';eid('aTotal').value='';eid('aDesc').value='';
+  toast(`Assessment "${name}" created.`,'success');
+  logActivity(`Created assessment: ${name}`,'📝');
+}
+
+function renderAssessmentTable(){
+  const tbody=eid('assessmentTable');
+  if(!APP.assessments.length){
+    tbody.innerHTML=`<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">📝</div><p>No assessments yet</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML=APP.assessments.map((a,i)=>`
+    <tr>
+      <td>${i+1}</td>
+      <td><strong>${a.name}</strong>${a.desc?`<br><span class="text-muted" style="font-size:.78rem;">${a.desc}</span>`:''}</td>
+      <td>${a.category}</td>
+      <td><span class="badge ${a.type==='Exam'?'badge-red':'badge-blue'}">${a.type}</span></td>
+      <td>${a.total}</td>
+      <td>${a.date||'—'}</td>
+      <td>${a.locked?'<span class="locked-badge">🔒 Locked</span>':'<span class="badge badge-green">Open</span>'}</td>
+      <td class="no-print">
+        <button class="btn-icon" onclick="openEditAssessment(${i})" title="Edit" ${a.locked?'disabled':''}>✏️</button>
+        <button class="btn-icon" onclick="toggleLock(${i})" title="${a.locked?'Unlock':'Lock'}">${a.locked?'🔓':'🔒'}</button>
+        <button class="btn-icon" onclick="deleteAssessment(${i})" title="Delete">🗑️</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function toggleLock(idx){
+  const a=APP.assessments[idx];
+  const newState=!a.locked;
+  confirm2(`${newState?'Lock':'Unlock'} assessment "${a.name}"? ${newState?'Scores cannot be edited while locked.':''}`,()=>{
+    APP.assessments[idx].locked=newState;
+    saveAppData();renderAssessmentTable();
+    toast(`Assessment ${newState?'locked':'unlocked'}.`,'info');
+    logActivity(`${newState?'Locked':'Unlocked'} assessment: ${a.name}`,'🔒');
+  });
+}
+
+function openEditAssessment(idx){
+  const a=APP.assessments[idx];
+  if(a.locked){return toast('Unlock assessment before editing.','error');}
+  eid('editAssessmentIdx').value=idx;
+  eid('editAssessmentName').value=a.name;
+  eid('editAssessmentCategory').value=a.category;
+  eid('editAssessmentTotal').value=a.total;
+  openModal('editAssessmentModal');
+}
+
+function saveEditAssessment(){
+  const idx=parseInt(eid('editAssessmentIdx').value);
+  APP.assessments[idx].name=eid('editAssessmentName').value.trim();
+  APP.assessments[idx].category=eid('editAssessmentCategory').value;
+  APP.assessments[idx].total=parseInt(eid('editAssessmentTotal').value);
+  saveAppData();closeModal('editAssessmentModal');renderAssessmentTable();
+  toast('Assessment updated.','success');
+}
+
+function deleteAssessment(idx){
+  const a=APP.assessments[idx];
+  confirm2(`Delete assessment "${a.name}" and all its scores? This cannot be undone.`,()=>{
+    delete APP.scores[a.id];
+    APP.assessments.splice(idx,1);
+    saveAppData();renderAssessmentTable();renderAssessmentDropdown();
+    toast('Assessment deleted.','info');
+    logActivity(`Deleted assessment: ${a.name}`,'🗑️');
+  });
+}
+
+function renderAssessmentDropdown(){
+  renderAssessmentTable();
+  const sel=eid('scoreAssessment');
+  if(!sel)return;
+  const cur=sel.value;
+  sel.innerHTML='<option value="">— Select an assessment —</option>'+
+    APP.assessments.map(a=>`<option value="${a.id}">${a.name} (/${a.total})</option>`).join('');
+  if(cur)sel.value=cur;
+}
+
+// ── SCORES ──
+function loadScoreSheet(){
+  const aid=eid('scoreAssessment').value;
+  const area=eid('scoreSheetArea');
+  if(!aid){area.innerHTML='';return;}
+  const assessment=APP.assessments.find(a=>a.id===aid);
+  if(!assessment){area.innerHTML='';return;}
+  if(!APP.scores[aid])APP.scores[aid]={};
+
+  if(assessment.locked){
+    area.innerHTML=`<div class="card"><div class="empty-state"><div class="empty-icon">🔒</div>
+      <p>This assessment is locked. Unlock it to enter or edit scores.</p></div></div>`;
+    return;
+  }
+
+  if(!APP.students.length){
+    area.innerHTML=`<div class="card"><div class="empty-state"><div class="empty-icon">👩🏾‍🎓</div>
+      <p>No students in class. Add students first.</p></div></div>`;
+    return;
+  }
+
+  area.innerHTML=`<div class="card">
+    <div class="card-title"><span class="icon">✏️</span> ${assessment.name} &nbsp;
+      <span class="text-muted" style="font-weight:normal;font-size:.85rem;">Total: ${assessment.total} marks</span>
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>#</th><th>Student Name</th><th>Gender</th><th>Score (/${assessment.total})</th><th>%</th></tr></thead>
+      <tbody>
+        ${APP.students.map((s,i)=>{
+          const sc=APP.scores[aid][i]!==undefined?APP.scores[aid][i]:'';
+          const pct=sc!==''?((sc/assessment.total)*100).toFixed(1):'—';
+          return`<tr>
+            <td>${i+1}</td><td>${s.name}</td>
+            <td><span class="badge ${s.gender==='Female'?'badge-gold':'badge-blue'}">${s.gender}</span></td>
+            <td><input type="number" class="score-input" id="sc_${aid}_${i}"
+              value="${sc}" min="0" max="${assessment.total}"
+              oninput="calcRowPct('${aid}',${i},${assessment.total})"/></td>
+            <td id="pct_${aid}_${i}">${pct}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table></div>
+    <div class="form-actions">
+      <button class="btn btn-primary" onclick="saveScores('${aid}')">💾 Save Scores</button>
+      <button class="btn btn-outline btn-sm" onclick="autoFillScores('${aid}',${assessment.total})">🎲 Demo Fill</button>
+    </div>
+  </div>`;
+}
+
+function calcRowPct(aid,idx,total){
+  const val=parseFloat(eid(`sc_${aid}_${idx}`)?.value)||0;
+  const pctEl=eid(`pct_${aid}_${idx}`);
+  if(pctEl)pctEl.textContent=((val/total)*100).toFixed(1);
+}
+
+function saveScores(aid){
+  const assessment=APP.assessments.find(a=>a.id===aid);
+  if(!assessment)return;
+  APP.students.forEach((s,i)=>{
+    const input=eid(`sc_${aid}_${i}`);
+    if(!input)return;
+    const val=input.value.trim();
+    if(val===''){delete APP.scores[aid][i];return;}
+    let sc=parseFloat(val);
+    if(isNaN(sc))return;
+    sc=Math.max(0,Math.min(sc,assessment.total));
+    APP.scores[aid][i]=sc;
+  });
+  saveAppData();
+  toast('Scores saved!','success');
+  logActivity(`Saved scores for: ${assessment.name}`,'✏️');
+}
+
+function autoFillScores(aid,total){
+  APP.students.forEach((s,i)=>{
+    const sc=Math.floor(Math.random()*total*0.7+total*0.3);
+    const input=eid(`sc_${aid}_${i}`);
+    if(input){input.value=sc;calcRowPct(aid,i,total);}
+    APP.scores[aid][i]=sc;
+  });
+  toast('Demo scores filled (for testing only).','info');
+}
+
+// ── GRADING HELPERS ──
+function getGrade(pct){
+  for(const g of APP.grading){
+    if(pct>=g.min&&pct<=g.max)return g;
+  }
+  return APP.grading[APP.grading.length-1];
+}
+
+function getStudentTotal(studentIdx){
+  let caTotal=0,caMax=0,examTotal=0,examMax=0;
+  APP.assessments.forEach(a=>{
+    const sc=APP.scores[a.id]?.[studentIdx];
+    if(sc!==undefined){
+      if(a.type==='Exam'){examTotal+=sc;examMax+=a.total;}
+      else{caTotal+=sc;caMax+=a.total;}
+    }
+  });
+  const p=APP.profile;
+  const caW=(p.caWeight||30)/100;
+  const exW=(p.examWeight||70)/100;
+  const caPct=caMax>0?(caTotal/caMax)*100:0;
+  const exPct=examMax>0?(examTotal/examMax)*100:0;
+  let overall;
+  if(caMax>0&&examMax>0){
+    overall=caPct*caW+exPct*exW;
+  } else if(caMax>0){
+    overall=caPct;
+  } else if(examMax>0){
+    overall=exPct;
+  } else {
+    overall=null;
+  }
+  return{caTotal,caMax,examTotal,examMax,caPct,exPct,overall};
+}
+
+// ── RESULTS ──
+function renderResults(){
+  const tbody=eid('resultsTable');
+  if(!tbody)return;
+  if(!APP.students.length){
+    tbody.innerHTML=`<tr><td colspan="9"><div class="empty-state"><div class="empty-icon">📊</div><p>No students or scores yet</p></div></td></tr>`;
+    return;
+  }
+
+  let rows=APP.students.map((s,i)=>{
+    const t=getStudentTotal(i);
+    const grade=t.overall!==null?getGrade(t.overall):null;
+    return{student:s,idx:i,t,grade};
+  });
+
+  // Sort
+  const sortBy=eid('resultSort')?.value||'position';
+  rows=rows.filter(r=>r.t.overall!==null);
+  if(!rows.length){
+    tbody.innerHTML=`<tr><td colspan="9"><div class="empty-state"><div class="empty-icon">✏️</div><p>Enter scores to see results</p></div></td></tr>`;
+    return;
+  }
+
+  rows.sort((a,b)=>b.t.overall-a.t.overall);
+  let pos=1;
+  rows.forEach((r,i)=>{
+    if(i>0&&r.t.overall<rows[i-1].t.overall)pos=i+1;
+    r.position=pos;
+  });
+
+  const gf=eid('gradeFilter')?.value||'';
+  if(gf)rows=rows.filter(r=>r.grade?.grade===gf);
+
+  if(sortBy==='name')rows.sort((a,b)=>a.student.name.localeCompare(b.student.name));
+  else if(sortBy==='score_asc')rows.sort((a,b)=>a.t.overall-b.t.overall);
+  else if(sortBy==='score_desc')rows.sort((a,b)=>b.t.overall-a.t.overall);
+
+  tbody.innerHTML=rows.map(r=>{
+    const g=r.grade;
+    const remark=APP.comments[g?.grade]||'';
+    return`<tr>
+      <td><strong>#${r.position}</strong></td>
+      <td>${r.student.name}</td>
+      <td><span class="badge ${r.student.gender==='Female'?'badge-gold':'badge-blue'}">${r.student.gender}</span></td>
+      <td>${r.student.index||'—'}</td>
+      <td>${r.t.caMax>0?r.t.caPct.toFixed(1)+'%':'—'}</td>
+      <td>${r.t.examMax>0?r.t.exPct.toFixed(1)+'%':'—'}</td>
+      <td><strong>${r.t.overall.toFixed(1)}%</strong></td>
+      <td>${g?`<span class="grade-badge grade-${g.grade}">${g.grade}</span>`:'—'}</td>
+      <td style="font-size:.78rem;color:var(--muted);">${remark.split('.')[0]}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── ANALYSIS ──
+function getAnalysisData(){
+  const rows=APP.students.map((s,i)=>{
+    const t=getStudentTotal(i);
+    const grade=t.overall!==null?getGrade(t.overall):null;
+    return{student:s,t,grade};
+  }).filter(r=>r.t.overall!==null);
+  return rows;
+}
+
+function renderAnalysis(){
+  const rows=getAnalysisData();
+  const stats=eid('analysisStats');
+  if(!rows.length){
+    stats.innerHTML='<p class="text-muted">No scores entered yet.</p>';
+    return;
+  }
+
+  const scores=rows.map(r=>r.t.overall);
+  const avg=scores.reduce((a,b)=>a+b,0)/scores.length;
+  const highest=Math.max(...scores);
+  const lowest=Math.min(...scores);
+  const passed=rows.filter(r=>r.grade&&r.grade.grade!=='F').length;
+  const failed=rows.length-passed;
+
+  stats.innerHTML=`
+    <div class="stat-card"><div class="stat-value">${rows.length}</div><div class="stat-label">Students Scored</div></div>
+    <div class="stat-card"><div class="stat-value">${avg.toFixed(1)}%</div><div class="stat-label">Class Average</div></div>
+    <div class="stat-card"><div class="stat-value">${highest.toFixed(1)}%</div><div class="stat-label">Highest Score</div></div>
+    <div class="stat-card"><div class="stat-value">${lowest.toFixed(1)}%</div><div class="stat-label">Lowest Score</div></div>
+    <div class="stat-card"><div class="stat-value" style="color:#4ade80;">${((passed/rows.length)*100).toFixed(0)}%</div><div class="stat-label">Pass Rate</div></div>
+    <div class="stat-card"><div class="stat-value" style="color:#f87171;">${((failed/rows.length)*100).toFixed(0)}%</div><div class="stat-label">Fail Rate</div></div>
+  `;
+
+  // Grade distribution
+  const gradeCounts={A:0,B:0,C:0,D:0,E:0,F:0};
+  rows.forEach(r=>{if(r.grade)gradeCounts[r.grade.grade]=(gradeCounts[r.grade.grade]||0)+1;});
+  const gradeColors=APP.grading.map(g=>g.color);
+
+  drawChart('gradeChart','bar',Object.keys(gradeCounts),Object.values(gradeCounts),
+    gradeColors,'Grade Distribution');
+
+  // Score range buckets
+  const buckets=[0,0,0,0,0];
+  const bucketLabels=['0-39','40-59','60-79','80-89','90-100'];
+  rows.forEach(r=>{
+    const o=r.t.overall;
+    if(o<40)buckets[0]++;else if(o<60)buckets[1]++;else if(o<80)buckets[2]++;else if(o<90)buckets[3]++;else buckets[4]++;
+  });
+  drawChart('scoreChart','bar',bucketLabels,buckets,
+    ['#f87171','#fb923c','#fbbf24','#60a5fa','#4ade80'],'Score Ranges');
+
+  // Gender
+  const males=rows.filter(r=>r.student.gender==='Male');
+  const females=rows.filter(r=>r.student.gender==='Female');
+  const mAvg=males.length?males.reduce((a,b)=>a+b.t.overall,0)/males.length:0;
+  const fAvg=females.length?females.reduce((a,b)=>a+b.t.overall,0)/females.length:0;
+  drawChart('genderChart','bar',['Male','Female'],[mAvg.toFixed(1),fAvg.toFixed(1)],
+    ['#60a5fa','#f9a8d4'],'Average Score by Gender');
+
+  // Summary
+  const topStudents=rows.sort((a,b)=>b.t.overall-a.t.overall).slice(0,3);
+  eid('perfSummary').innerHTML=`
+    <div class="form-row">
+      <div>
+        <h4 style="margin-bottom:10px;font-size:.9rem;">🏆 Top Performers</h4>
+        ${topStudents.map((r,i)=>`
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <span style="font-size:1.2rem;">${['🥇','🥈','🥉'][i]}</span>
+            <div><div>${r.student.name}</div>
+            <div class="text-muted" style="font-size:.78rem;">${r.t.overall.toFixed(1)}% · ${r.grade?.label}</div></div>
+          </div>`).join('')}
+      </div>
+      <div>
+        <h4 style="margin-bottom:10px;font-size:.9rem;">📊 Key Metrics</h4>
+        <div style="font-size:.85rem;line-height:2;">
+          <div>Total Students: <strong>${rows.length}</strong></div>
+          <div>Males: <strong>${males.length}</strong> · Females: <strong>${females.length}</strong></div>
+          <div>Male Avg: <strong>${mAvg.toFixed(1)}%</strong> · Female Avg: <strong>${fAvg.toFixed(1)}%</strong></div>
+          <div>Pass: <strong>${passed}</strong> · Fail: <strong>${failed}</strong></div>
+          <div>Grade A: <strong>${gradeCounts.A}</strong> · Grade F: <strong>${gradeCounts.F}</strong></div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function drawChart(canvasId,type,labels,data,colors,label){
+  const canvas=eid(canvasId);
+  if(!canvas)return;
+  if(charts[canvasId])charts[canvasId].destroy();
+  const ctx=canvas.getContext('2d');
+  const isDark=!document.body.classList.contains('light');
+  const textColor=isDark?'#7a94b0':'#4a6080';
+  const gridColor=isDark?'#2e4060':'#c3d0e0';
+  charts[canvasId]=new MiniChart(ctx,{
+    type,labels,
+    datasets:[{label,data,backgroundColor:Array.isArray(colors)?colors:colors}],
+    textColor,gridColor
+  });
+}
+
+// ── BROADSHEET ──
+function renderBroadsheet(){
+  const el=eid('broadsheetContent');
+  if(!el)return;
+  if(!APP.students.length||!APP.assessments.length){
+    el.innerHTML='<div class="empty-state"><div class="empty-icon">📑</div><p>Add students and assessments first.</p></div>';
+    return;
+  }
+  const p=APP.profile;
+  const rows=APP.students.map((s,i)=>{
+    const t=getStudentTotal(i);
+    const grade=t.overall!==null?getGrade(t.overall):null;
+    return{s,i,t,grade};
+  });
+  rows.sort((a,b)=>(b.t.overall||0)-(a.t.overall||0));
+  let pos=1;
+  rows.forEach((r,i)=>{
+    if(i>0&&(r.t.overall||0)<(rows[i-1].t.overall||0))pos=i+1;
+    r.position=pos;
+  });
+
+  el.innerHTML=`
+    <div style="text-align:center;margin-bottom:20px;">
+      <h2>${p.school||'School Name'}</h2>
+      <p>${p.class||''} · ${p.subject||''} · ${p.term||''} ${p.year||''}</p>
+      <p class="text-muted">Teacher: ${p.teacher||APP.currentUser?.name||''}</p>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Pos.</th><th>Name</th><th>G</th>
+            ${APP.assessments.map(a=>`<th title="${a.name}">${a.name.substring(0,8)}..<br><small>/${a.total}</small></th>`).join('')}
+            <th>CA%</th><th>Exam%</th><th>Total%</th><th>Grade</th><th>Remarks</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map(r=>{
+            const g=r.grade;
+            return`<tr>
+              <td>${r.t.overall!==null?'#'+r.position:'—'}</td>
+              <td>${r.s.name}</td>
+              <td>${r.s.gender[0]}</td>
+              ${APP.assessments.map(a=>{
+                const sc=APP.scores[a.id]?.[r.i];
+                return`<td>${sc!==undefined?sc:'—'}</td>`;
+              }).join('')}
+              <td>${r.t.caMax>0?r.t.caPct.toFixed(1):'—'}</td>
+              <td>${r.t.examMax>0?r.t.exPct.toFixed(1):'—'}</td>
+              <td>${r.t.overall!==null?r.t.overall.toFixed(1):'—'}</td>
+              <td>${g?`<span class="grade-badge grade-${g.grade}">${g.grade}</span>`:'—'}</td>
+              <td style="font-size:.75rem;">${g?APP.comments[g.grade].split('.')[0]:''}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+// ── GRADING TABLE ──
+function renderGradingTable(){
+  const el=eid('gradingTable');
+  if(!el)return;
+  el.innerHTML=`<div class="table-wrap"><table>
+    <thead><tr><th>Grade</th><th>Label</th><th>Min Score (%)</th><th>Max Score (%)</th><th>Color</th></tr></thead>
+    <tbody>
+      ${APP.grading.map((g,i)=>`<tr>
+        <td><span class="grade-badge grade-${g.grade}">${g.grade}</span></td>
+        <td><input type="text" class="form-control" id="glabel_${i}" value="${g.label}" style="max-width:150px;"/></td>
+        <td><input type="number" class="form-control" id="gmin_${i}" value="${g.min}" style="max-width:90px;"/></td>
+        <td><input type="number" class="form-control" id="gmax_${i}" value="${g.max}" style="max-width:90px;"/></td>
+        <td><input type="color" value="${g.color}" id="gcolor_${i}" style="width:40px;height:30px;border:none;border-radius:4px;cursor:pointer;"/></td>
+      </tr>`).join('')}
+    </tbody>
+  </table></div>`;
+}
+
+function saveGrading(){
+  APP.grading=APP.grading.map((g,i)=>({
+    ...g,
+    label:eid(`glabel_${i}`)?.value||g.label,
+    min:parseInt(eid(`gmin_${i}`)?.value)||g.min,
+    max:parseInt(eid(`gmax_${i}`)?.value)||g.max,
+    color:eid(`gcolor_${i}`)?.value||g.color,
+  }));
+  saveAppData();toast('Grading scale saved!','success');
+  logActivity('Updated grading scale','⚖️');
+}
+
+function resetGrading(){
+  confirm2('Reset grading to Ghana NaCCA defaults?',()=>{
+    APP.grading=[
+      {grade:'A',label:'Excellent',min:80,max:100,color:'#4ade80'},
+      {grade:'B',label:'Very Good',min:70,max:79,color:'#60a5fa'},
+      {grade:'C',label:'Good',min:60,max:69,color:'#fbbf24'},
+      {grade:'D',label:'Credit',min:50,max:59,color:'#a78bfa'},
+      {grade:'E',label:'Pass',min:40,max:49,color:'#fb923c'},
+      {grade:'F',label:'Fail',min:0,max:39,color:'#f87171'},
+    ];
+    saveAppData();renderGradingTable();toast('Grading reset to defaults.','success');
+  });
+}
+
+function renderCommentBank(){
+  const el=eid('commentBank');
+  if(!el)return;
+  el.innerHTML=APP.grading.map(g=>`
+    <div class="form-group">
+      <label><span class="grade-badge grade-${g.grade}" style="margin-right:6px;">${g.grade}</span> ${g.label} Remark</label>
+      <textarea class="form-control" id="comment_${g.grade}" rows="2">${APP.comments[g.grade]||''}</textarea>
+    </div>
+  `).join('');
+}
+
+function saveComments(){
+  APP.grading.forEach(g=>{
+    const el=eid(`comment_${g.grade}`);
+    if(el)APP.comments[g.grade]=el.value;
+  });
+  saveAppData();toast('Comments saved!','success');
+}
+
+// ── ATTENDANCE ──
+function loadAttendanceSheet(){
+  if(!APP.students.length){return toast('No students in class.','error');}
+  const date=eid('attDate').value;
+  const session=eid('attSession').value;
+  if(!date){return toast('Select a date.','error');}
+  const key=`${date}_${session}`;
+  const existing=APP.attendance[key]||[];
+  eid('attendanceSheet').style.display='block';
+  const tbody=eid('attendanceTable');
+  tbody.innerHTML=APP.students.map((s,i)=>{
+    const rec=existing.find(r=>r.idx===i);
+    const present=rec?rec.present:true;
+    return`<tr>
+      <td>${i+1}</td><td>${s.name}</td>
+      <td><input type="radio" name="att_${i}" value="present" ${present?'checked':''}/> Present</td>
+      <td><input type="radio" name="att_${i}" value="absent" ${!present?'checked':''}/> Absent</td>
+      <td><input type="text" class="form-control" id="attRem_${i}" value="${rec?.remark||''}" placeholder="Optional remark" style="max-width:180px;"/></td>
+    </tr>`;
+  }).join('');
+}
+
+function saveAttendance(){
+  const date=eid('attDate').value;
+  const session=eid('attSession').value;
+  const key=`${date}_${session}`;
+  APP.attendance[key]=APP.students.map((s,i)=>{
+    const radios=document.querySelectorAll(`input[name="att_${i}"]`);
+    let present=true;
+    radios.forEach(r=>{if(r.checked)present=r.value==='present';});
+    return{idx:i,present,remark:eid(`attRem_${i}`)?.value||''};
+  });
+  saveAppData();
+  renderAttendanceSummary();
+  toast('Attendance saved!','success');
+  logActivity(`Saved attendance for ${date} ${session}`,'📋');
+}
+
+function renderAttendanceSummary(){
+  const el=eid('attendanceSummary');
+  if(!el)return;
+  const keys=Object.keys(APP.attendance);
+  if(!keys.length){
+    el.innerHTML='<div class="empty-state"><div class="empty-icon">📋</div><p>No attendance records yet</p></div>';
+    return;
+  }
+  el.innerHTML=`<div class="table-wrap"><table>
+    <thead><tr><th>Date</th><th>Session</th><th>Present</th><th>Absent</th><th>Total</th></tr></thead>
+    <tbody>
+      ${keys.sort().reverse().slice(0,20).map(k=>{
+        const [date,session]=k.split('_');
+        const recs=APP.attendance[k];
+        const present=recs.filter(r=>r.present).length;
+        const absent=recs.length-present;
+        return`<tr>
+          <td>${date}</td><td>${session}</td>
+          <td><span class="badge badge-green">${present}</span></td>
+          <td><span class="badge badge-red">${absent}</span></td>
+          <td>${recs.length}</td>
+        </tr>`;
+      }).join('')}
+    </tbody>
+  </table></div>`;
+}
+
+// ── REPORTS / PDF ──
+function updateReportStudentSelect(){
+  const sel=eid('reportStudent');
+  if(!sel)return;
+  sel.innerHTML='<option value="">All Students</option>'+
+    APP.students.map((s,i)=>`<option value="${i}">${s.name}</option>`).join('');
+}
+
+function buildReportHTML(type,studentIdx,notes){
+  const p=APP.profile;
+  const teacher=p.teacher||APP.currentUser?.name||'';
+  const now=new Date().toLocaleDateString('en-GH',{year:'numeric',month:'long',day:'numeric'});
+  let content='';
+
+  if(type==='class'||type==='broadsheet'){
+    // Class summary
+    const rows=APP.students.map((s,i)=>{
+      const t=getStudentTotal(i);
+      const grade=t.overall!==null?getGrade(t.overall):null;
+      return{s,i,t,grade};
+    }).filter(r=>r.t.overall!==null);
+    rows.sort((a,b)=>b.t.overall-a.t.overall);
+    let pos=1;
+    rows.forEach((r,i)=>{
+      if(i>0&&r.t.overall<rows[i-1].t.overall)pos=i+1;
+      r.position=pos;
+    });
+    const avg=rows.length?rows.reduce((a,b)=>a+b.t.overall,0)/rows.length:0;
+    content=`
+      <h3 style="margin-bottom:12px;">Class Summary</h3>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead><tr style="background:#1a6b3c;color:#fff;">
+          <th style="padding:6px 8px;text-align:left;">Pos.</th>
+          <th style="padding:6px 8px;text-align:left;">Name</th>
+          <th style="padding:6px 8px;">Gender</th>
+          <th style="padding:6px 8px;">CA%</th>
+          <th style="padding:6px 8px;">Exam%</th>
+          <th style="padding:6px 8px;">Total%</th>
+          <th style="padding:6px 8px;">Grade</th>
+          <th style="padding:6px 8px;text-align:left;">Remarks</th>
+        </tr></thead>
+        <tbody>
+          ${rows.map((r,i)=>`
+            <tr style="background:${i%2===0?'#f8fffe':'#fff'};">
+              <td style="padding:5px 8px;">#${r.position}</td>
+              <td style="padding:5px 8px;"><strong>${r.s.name}</strong></td>
+              <td style="padding:5px 8px;text-align:center;">${r.s.gender[0]}</td>
+              <td style="padding:5px 8px;text-align:center;">${r.t.caMax>0?r.t.caPct.toFixed(1):'—'}</td>
+              <td style="padding:5px 8px;text-align:center;">${r.t.examMax>0?r.t.exPct.toFixed(1):'—'}</td>
+              <td style="padding:5px 8px;text-align:center;"><strong>${r.t.overall.toFixed(1)}%</strong></td>
+              <td style="padding:5px 8px;text-align:center;font-weight:700;">${r.grade?.grade||'—'}</td>
+              <td style="padding:5px 8px;font-size:11px;">${r.grade?APP.comments[r.grade.grade].split('.')[0]:''}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+      <div style="margin-top:16px;background:#f0fdf4;padding:12px;border-radius:6px;border:1px solid #86efac;">
+        <strong>Class Average: ${avg.toFixed(1)}%</strong> &nbsp;|&nbsp;
+        Passed: ${rows.filter(r=>r.grade?.grade!=='F').length} &nbsp;|&nbsp;
+        Failed: ${rows.filter(r=>r.grade?.grade==='F').length} &nbsp;|&nbsp;
+        Total: ${rows.length}
+      </div>
+    `;
+  } else {
+    // Individual report
+    const targets=studentIdx!==''?[parseInt(studentIdx)]:APP.students.map((_,i)=>i);
+    content=targets.map(idx=>{
+      const s=APP.students[idx];
+      if(!s)return'';
+      const t=getStudentTotal(idx);
+      const grade=t.overall!==null?getGrade(t.overall):null;
+      const scBreakdown=APP.assessments.map(a=>{
+        const sc=APP.scores[a.id]?.[idx];
+        return`<tr>
+          <td style="padding:4px 8px;">${a.name}</td>
+          <td style="padding:4px 8px;text-align:center;">${a.category}</td>
+          <td style="padding:4px 8px;text-align:center;">${a.type}</td>
+          <td style="padding:4px 8px;text-align:center;">${sc!==undefined?sc:'—'}</td>
+          <td style="padding:4px 8px;text-align:center;">${a.total}</td>
+          <td style="padding:4px 8px;text-align:center;">${sc!==undefined?((sc/a.total)*100).toFixed(1)+'%':'—'}</td>
+        </tr>`;
+      }).join('');
+      return`
+        <div style="page-break-after:always;padding-bottom:20px;margin-bottom:20px;border-bottom:2px solid #ccc;">
+          <h3>${s.name}</h3>
+          <p style="color:#666;margin-bottom:12px;">Gender: ${s.gender} | Index: ${s.index||'N/A'}</p>
+          <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:12px;">
+            <thead><tr style="background:#f0f0f0;">
+              <th style="padding:6px 8px;text-align:left;">Assessment</th>
+              <th style="padding:6px 8px;">Category</th>
+              <th style="padding:6px 8px;">Type</th>
+              <th style="padding:6px 8px;">Score</th>
+              <th style="padding:6px 8px;">Total</th>
+              <th style="padding:6px 8px;">%</th>
+            </tr></thead>
+            <tbody>${scBreakdown}</tbody>
+          </table>
+          ${t.overall!==null?`
+          <div style="background:#f0fdf4;padding:12px;border-radius:6px;margin-bottom:12px;">
+            <strong>CA Average: ${t.caMax>0?t.caPct.toFixed(1)+'%':'N/A'}</strong> &nbsp;|&nbsp;
+            <strong>Exam Average: ${t.examMax>0?t.exPct.toFixed(1)+'%':'N/A'}</strong> &nbsp;|&nbsp;
+            <strong>Overall: ${t.overall.toFixed(1)}%</strong> &nbsp;|&nbsp;
+            <strong style="color:${grade?.color||'#000'};">Grade: ${grade?.grade} (${grade?.label})</strong>
+          </div>
+          <p style="font-style:italic;color:#555;">${grade?APP.comments[grade.grade]:''}</p>`:'<p style="color:#999;">No scores recorded.</p>'}
+        </div>`;
+    }).join('');
+  }
+
+  return`<!DOCTYPE html><html><head><meta charset="UTF-8"/>
+  <title>Assessment Report</title>
+  <style>
+    body{font-family:Arial,sans-serif;margin:20mm;color:#000;}
+    .header{text-align:center;border-bottom:3px solid #1a6b3c;padding-bottom:16px;margin-bottom:20px;}
+    .gh-flag{font-size:2rem;margin-bottom:4px;}
+    h1{color:#1a6b3c;font-size:1.4rem;margin:0;}
+    .meta{display:flex;gap:20px;flex-wrap:wrap;font-size:12px;color:#555;margin-bottom:20px;}
+    .meta div{flex:1;min-width:150px;}
+    .meta span{display:block;font-size:10px;color:#999;text-transform:uppercase;}
+    .meta strong{font-size:13px;color:#000;}
+    .footer{margin-top:40px;display:flex;justify-content:space-between;font-size:11px;border-top:1px solid #ccc;padding-top:12px;}
+    .sig-line{border-top:1px solid #000;width:180px;margin-top:30px;text-align:center;padding-top:4px;font-size:11px;}
+    @media print{body{margin:10mm;}}
+  </style></head><body>
+  <div class="header">
+    <div class="gh-flag">🇬🇭</div>
+    <h1>${p.school||'Ghana Education Service'}</h1>
+    <div style="color:#555;font-size:13px;margin-top:4px;">
+      ${p.class||''} · ${p.subject||''} · ${p.term||''} ${p.year||''}
+    </div>
+    ${p.strand?`<div style="font-size:11px;color:#888;margin-top:2px;">Strand: ${p.strand}${p.substrand?' › '+p.substrand:''}</div>`:''}
+  </div>
+  <div class="meta">
+    <div><span>Region</span><strong>${p.region||'—'}</strong></div>
+    <div><span>Academic Year</span><strong>${p.year||'—'}</strong></div>
+    <div><span>Term</span><strong>${p.term||'—'}</strong></div>
+    <div><span>Class</span><strong>${p.class||'—'}</strong></div>
+    <div><span>Subject</span><strong>${p.subject||'—'}</strong></div>
+    <div><span>Teacher</span><strong>${teacher}</strong></div>
+    <div><span>Level</span><strong>${p.level||'—'}</strong></div>
+    <div><span>Date</span><strong>${now}</strong></div>
+  </div>
+  ${content}
+  ${notes?`<div style="margin-top:20px;padding:12px;background:#fffbeb;border:1px solid #fcd34d;border-radius:6px;font-size:12px;">
+    <strong>Additional Notes:</strong><br/>${notes}</div>`:''}
+  <div class="footer">
+    <div>
+      <div class="sig-line">Teacher's Signature</div>
+    </div>
+    <div>
+      <div class="sig-line">Head Teacher's Signature</div>
+    </div>
+    <div style="font-size:10px;color:#999;align-self:flex-end;">
+      Generated by GES NaCCA Assessment Manager · ${now}
+    </div>
+  </div>
+  </body></html>`;
+}
+
+function generatePDF(){
+  const type=eid('reportType').value;
+  const studentIdx=eid('reportStudent').value;
+  const notes=eid('reportNotes').value;
+  const html=buildReportHTML(type,studentIdx,notes);
+  const blob=new Blob([html],{type:'text/html'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const p=APP.profile;
+  a.href=url;
+  a.download=`GES_Report_${p.class||'Class'}_${p.subject||'Subject'}_${p.term||'Term'}.html`.replace(/\s+/g,'_');
+  a.click();
+  URL.revokeObjectURL(url);
+  // Also show preview
+  eid('reportPreviewContent').innerHTML=html.replace(/<html>.*?<body>/s,'').replace(/<\/body>.*?<\/html>/s,'');
+  toast('Report downloaded! Open the HTML file to print as PDF.','success');
+  logActivity(`Generated ${type} report`,'📄');
+}
+
+function printReport(){
+  const type=eid('reportType')?.value||'class';
+  const html=buildReportHTML(type,'','');
+  const win=window.open('','_blank');
+  win.document.write(html);
+  win.document.close();
+  win.print();
+  logActivity('Printed report','🖨️');
+}
+
+// ── BACKUP ──
+function renderBackupInfo(){
+  const d=ls('ges_data');
+  if(d&&d.savedAt){
+    eid('backupInfo').innerHTML=`Last saved: <strong>${new Date(d.savedAt).toLocaleString()}</strong> · 
+      ${APP.students.length} students · ${APP.assessments.length} assessments`;
+  }
+}
+
+function exportBackup(){
+  const data={
+    ...ls('ges_data'),
+    exportedAt:new Date().toISOString(),
+    exportedBy:APP.currentUser?.name,
+    version:APP.version,
+  };
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const p=APP.profile;
+  a.href=url;
+  a.download=`GES_Backup_${(p.school||'School').replace(/\s+/g,'_')}_${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Backup downloaded!','success');
+  logActivity('Exported data backup','💾');
+}
+
+function exportCSV(){
+  const rows=APP.students.map((s,i)=>{
+    const t=getStudentTotal(i);
+    const grade=t.overall!==null?getGrade(t.overall):null;
+    return[s.name,s.gender,s.index||'',t.caPct.toFixed(1),t.exPct.toFixed(1),
+      t.overall!==null?t.overall.toFixed(1):'',grade?.grade||'',grade?.label||''].join(',');
+  });
+  const header='Name,Gender,Index,CA%,Exam%,Total%,Grade,Remarks';
+  const blob=new Blob([[header,...rows].join('\n')],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='Results.csv';a.click();
+  URL.revokeObjectURL(url);
+  toast('CSV exported!','success');
+  logActivity('Exported CSV results','📊');
+}
+
+function exportBroadsheetCSV(){exportCSV();}
+
+function importBackup(){
+  const file=eid('importFile').files[0];
+  if(!file){return toast('Select a backup file first.','error');}
+  const reader=new FileReader();
+  reader.onload=e=>{
+    confirm2('This will replace ALL current data. Are you sure?',()=>{
+      try{
+        const data=JSON.parse(e.target.result);
+        ls('ges_data',data);
+        loadAppData();loadProfile();renderStudents();renderAssessmentDropdown();
+        renderResults();renderBroadsheet();renderGradingTable();renderCommentBank();
+        renderLogs();updateTopbar();
+        toast('Backup restored successfully!','success');
+        logActivity('Imported data backup','📥');
+      }catch(err){toast('Invalid backup file.','error');}
+    });
+  };
+  reader.readAsText(file);
+}
+
+function clearAllData(){
+  confirm2('DANGER: This will delete ALL students, assessments, scores, and settings. This cannot be undone!',()=>{
+    confirm2('Are you absolutely sure? All data will be lost forever.',()=>{
+      APP.students=[];APP.assessments=[];APP.scores={};APP.attendance={};APP.profile={};APP.logs=[];
+      saveAppData();
+      renderStudents();renderAssessmentTable();renderResults();renderBroadsheet();
+      toast('All data cleared.','info');
+    });
+  });
+}
+
+// ── LOGS ──
+function renderLogs(){
+  const el=eid('logList');
+  if(!el)return;
+  if(!APP.logs.length){
+    el.innerHTML='<div class="empty-state"><div class="empty-icon">🕓</div><p>No activity recorded yet</p></div>';
+    return;
+  }
+  el.innerHTML=APP.logs.slice(0,100).map(l=>`
+    <div class="log-entry">
+      <div class="log-icon">${l.icon||'📌'}</div>
+      <div class="log-time">${l.time}</div>
+      <div class="log-action">${l.action}</div>
+      <div class="text-muted" style="flex-shrink:0;font-size:.78rem;">${l.user||''}</div>
+    </div>
+  `).join('');
+}
+
+function exportLogs(){
+  const text=APP.logs.map(l=>`[${l.time}] ${l.icon} ${l.action} (${l.user})`).join('\n');
+  const blob=new Blob([text],{type:'text/plain'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='activity_log.txt';a.click();
+  URL.revokeObjectURL(url);
+  toast('Logs exported.','success');
+}
+
+function clearLogs(){
+  confirm2('Clear all activity logs?',()=>{
+    APP.logs=[];saveAppData();renderLogs();
+    toast('Logs cleared.','info');
+  });
+}
+
+// ── DASHBOARD ──
+function renderDashboard(){
+  eid('dashTeacher').textContent=APP.currentUser?.name||'Teacher';
+  const p=APP.profile;
+  const scores_count=Object.values(APP.scores).reduce((a,s)=>a+Object.keys(s).length,0);
+
+  eid('dashStats').innerHTML=`
+    <div class="stat-card"><div class="stat-value">${APP.students.length}</div><div class="stat-label">Students</div></div>
+    <div class="stat-card"><div class="stat-value">${APP.assessments.length}</div><div class="stat-label">Assessments</div></div>
+    <div class="stat-card"><div class="stat-value">${scores_count}</div><div class="stat-label">Scores Entered</div></div>
+    <div class="stat-card"><div class="stat-value">${Object.keys(APP.attendance).length}</div><div class="stat-label">Attendance Days</div></div>
+  `;
+
+  if(p.school){
+    eid('dashSchoolInfo').innerHTML=`
+      <div style="line-height:2;font-size:.88rem;">
+        <div>🏫 <strong>${p.school}</strong></div>
+        <div>📍 ${p.region||'—'}</div>
+        <div>📚 ${p.subject||'—'} · ${p.class||'—'}</div>
+        <div>📅 ${p.term||'—'} · ${p.year||'—'}</div>
+        <div>👤 ${p.teacher||APP.currentUser?.name||'—'}</div>
+        ${p.strand?`<div>🔬 ${p.strand}${p.substrand?' › '+p.substrand:''}</div>`:''}
+      </div>`;
+  }
+
+  // Grade distribution chart
+  const gradeCounts={A:0,B:0,C:0,D:0,E:0,F:0};
+  APP.students.forEach((_,i)=>{
+    const t=getStudentTotal(i);
+    if(t.overall!==null){const g=getGrade(t.overall);if(g)gradeCounts[g.grade]++;}
+  });
+  setTimeout(()=>drawChart('dashChart','bar',
+    Object.keys(gradeCounts),Object.values(gradeCounts),
+    APP.grading.map(g=>g.color),'Students per Grade'),100);
+
+  // Recent logs
+  const rLogs=eid('recentLogs');
+  if(!APP.logs.length){
+    rLogs.innerHTML='<p class="text-muted" style="font-size:.85rem;">No activity yet.</p>';
+  } else {
+    rLogs.innerHTML=APP.logs.slice(0,5).map(l=>`
+      <div class="log-entry">
+        <div class="log-icon">${l.icon||'📌'}</div>
+        <div class="log-time">${l.time}</div>
+        <div class="log-action">${l.action}</div>
+      </div>`).join('');
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  MINI CHART ENGINE (pure canvas, no external lib)
+// ═══════════════════════════════════════════════════════
+class MiniChart{
+  constructor(ctx,{type,labels,datasets,textColor,gridColor}){
+    this.ctx=ctx;this.type=type;this.labels=labels;
+    this.datasets=datasets;this.textColor=textColor||'#7a94b0';
+    this.gridColor=gridColor||'#2e4060';
+    this.draw();
+  }
+  destroy(){const c=this.ctx.canvas;this.ctx.clearRect(0,0,c.width,c.height);}
+  draw(){
+    const ctx=this.ctx;const canvas=ctx.canvas;
+    const W=canvas.width=canvas.offsetWidth||canvas.parentElement?.offsetWidth||400;
+    const H=canvas.height=canvas.parentElement?.offsetHeight||240;
+    ctx.clearRect(0,0,W,H);
+    const pad={top:20,right:20,bottom:40,left:45};
+    const dw=W-pad.left-pad.right;
+    const dh=H-pad.top-pad.bottom;
+    const data=this.datasets[0].data.map(Number);
+    const max=Math.max(...data,1);
+    const colors=this.datasets[0].backgroundColor;
+    // Grid
+    ctx.strokeStyle=this.gridColor;ctx.lineWidth=1;
+    for(let i=0;i<=4;i++){
+      const y=pad.top+dh*(1-i/4);
+      ctx.beginPath();ctx.moveTo(pad.left,y);ctx.lineTo(pad.left+dw,y);ctx.stroke();
+      ctx.fillStyle=this.textColor;ctx.font='11px sans-serif';ctx.textAlign='right';
+      ctx.fillText(((max*i/4)).toFixed(0),pad.left-6,y+4);
+    }
+    // Bars
+    const bw=dw/this.labels.length*0.65;
+    const gap=dw/this.labels.length;
+    this.labels.forEach((lbl,i)=>{
+      const v=data[i]||0;
+      const bh=(v/max)*dh;
+      const x=pad.left+i*gap+(gap-bw)/2;
+      const y=pad.top+dh-bh;
+      const color=Array.isArray(colors)?colors[i%colors.length]:colors;
+      ctx.fillStyle=color;
+      // Rounded top
+      ctx.beginPath();
+      ctx.roundRect?ctx.roundRect(x,y,bw,bh,4):ctx.rect(x,y,bw,bh);
+      ctx.fill();
+      // Value label
+      if(v>0){
+        ctx.fillStyle=this.textColor;ctx.font='bold 11px sans-serif';ctx.textAlign='center';
+        ctx.fillText(v,x+bw/2,y-5);
+      }
+      // X label
+      ctx.fillStyle=this.textColor;ctx.font='11px sans-serif';ctx.textAlign='center';
+      ctx.fillText(lbl,x+bw/2,H-8);
+    });
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════
+window.addEventListener('load',()=>{
+  if(autoLogin()){
+    startApp();
+    logActivity('Session resumed (auto-login)','🔄');
+  } else {
+    eid('auth-screen').style.display='flex';
+  }
+});
+
+// Auto-save every 30 seconds
+setInterval(()=>{
+  if(APP.currentUser)saveAppData();
+},30000);
+
+// Window resize redraws charts
+window.addEventListener('resize',()=>{
+  if(eid('page-analysis').classList.contains('active'))renderAnalysis();
+  if(eid('page-dashboard').classList.contains('active'))renderDashboard();
+});
+</script>
+</body>
+</html>
