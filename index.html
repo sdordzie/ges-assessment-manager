@@ -497,11 +497,11 @@ canvas.chart-canvas { width: 100% !important; }
       <!-- LOGIN -->
       <div id="atab-login">
         <div class="form-group">
-          <label class="form-label">Email Address</label>
+          <label for="loginEmail" class="form-label">Email Address</label>
           <input type="email" id="loginEmail" class="form-control" placeholder="your@email.com"/>
         </div>
         <div class="form-group">
-          <label class="form-label">Password</label>
+          <label for="loginPass" class="form-label">Password</label>
           <input type="password" id="loginPass" class="form-control" placeholder="Your password"/>
         </div>
         <button class="btn btn-primary btn-full" onclick="doLogin()" id="loginBtn">
@@ -516,11 +516,11 @@ canvas.chart-canvas { width: 100% !important; }
       <div id="atab-register" style="display:none;">
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Full Name *</label>
+            <label for="regName" class="form-label">Full Name *</label>
             <input type="text" id="regName" class="form-control" placeholder="Your full name"/>
           </div>
           <div class="form-group">
-            <label class="form-label">Role *</label>
+            <label for="regRole" class="form-label">Role *</label>
             <select id="regRole" class="form-control">
               <option value="teacher">Class / Subject Teacher</option>
               <option value="headteacher">Head Teacher</option>
@@ -529,20 +529,20 @@ canvas.chart-canvas { width: 100% !important; }
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">School Name *</label>
+          <label for="regSchool" class="form-label">School Name *</label>
           <input type="text" id="regSchool" class="form-control" placeholder="e.g. Achimota School"/>
         </div>
         <div class="form-group">
-          <label class="form-label">GES District</label>
+          <label for="regDistrict" class="form-label">GES District</label>
           <input type="text" id="regDistrict" class="form-control" placeholder="e.g. Accra Metro"/>
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Email *</label>
+            <label for="regEmail" class="form-label">Email *</label>
             <input type="email" id="regEmail" class="form-control" placeholder="your@email.com"/>
           </div>
           <div class="form-group">
-            <label class="form-label">Password *</label>
+            <label for="regPass" class="form-label">Password *</label>
             <input type="password" id="regPass" class="form-control" placeholder="Min. 6 chars"/>
           </div>
         </div>
@@ -557,7 +557,7 @@ canvas.chart-canvas { width: 100% !important; }
       <!-- RESET -->
       <div id="atab-reset" style="display:none;">
         <div class="form-group">
-          <label class="form-label">Email Address</label>
+          <label for="resetEmail" class="form-label">Email Address</label>
           <input type="email" id="resetEmail" class="form-control" placeholder="your@email.com"/>
         </div>
         <button class="btn btn-primary btn-full" onclick="doReset()">Send Reset Link</button>
@@ -666,9 +666,9 @@ canvas.chart-canvas { width: 100% !important; }
         <div class="card">
           <div class="card-title"><span class="ct-icon">🏫</span> Profile Settings</div>
           <div class="form-row">
-            <div class="form-group"><label class="form-label">School Name *</label>
+            <div class="form-group"><label for="pSchool" class="form-label">School Name *</label>
               <input type="text" id="pSchool" class="form-control"/></div>
-            <div class="form-group"><label class="form-label">GES Region</label>
+            <div class="form-group"><label for="pRegion" class="form-label">GES Region</label>
               <select id="pRegion" class="form-control">
                 <option>Greater Accra</option><option>Ashanti</option><option>Western</option>
                 <option>Eastern</option><option>Central</option><option>Northern</option>
@@ -678,27 +678,27 @@ canvas.chart-canvas { width: 100% !important; }
               </select></div>
           </div>
           <div class="form-row">
-            <div class="form-group"><label class="form-label">GES District</label>
+            <div class="form-group"><label for="pDistrict" class="form-label">GES District</label>
               <input type="text" id="pDistrict" class="form-control" placeholder="e.g. Accra Metro"/></div>
-            <div class="form-group"><label class="form-label">Circuit</label>
+            <div class="form-group"><label for="pCircuit" class="form-label">Circuit</label>
               <input type="text" id="pCircuit" class="form-control" placeholder="e.g. Labone Circuit"/></div>
           </div>
           <div class="form-row form-row-3">
-            <div class="form-group"><label class="form-label">Academic Year *</label>
+            <div class="form-group"><label for="pYear" class="form-label">Academic Year *</label>
               <input type="text" id="pYear" class="form-control" placeholder="2024/2025"/></div>
             <div class="form-group">
-              <label class="form-label" id="pTermLabel">Term *</label>
+              <label for="pTerm" class="form-label" id="pTermLabel">Term *</label>
               <select id="pTerm" class="form-control">
                 <option>Term 1</option><option>Term 2</option><option>Term 3</option>
               </select></div>
-            <div class="form-group"><label class="form-label">Level *</label>
+            <div class="form-group"><label for="pLevel" class="form-label">Level *</label>
               <select id="pLevel" class="form-control" onchange="updateClassOptions(); updateTermOptions();">
                 <option value="Basic">Basic (KG–JHS)</option>
                 <option value="SHS">SHS (Form 1–3)</option>
               </select></div>
           </div>
           <div class="form-row">
-            <div class="form-group"><label class="form-label">Class *</label>
+            <div class="form-group"><label for="pClass" class="form-label">Class *</label>
               <select id="pClass" class="form-control" onchange="handleClassSelect()"></select>
               <div id="customClassWrap" style="display:none;margin-top:8px;">
                 <input type="text" id="pClassCustom" class="form-control"
@@ -709,19 +709,19 @@ canvas.chart-canvas { width: 100% !important; }
                 </div>
               </div>
             </div>
-            <div class="form-group"><label class="form-label">Subject *</label>
+            <div class="form-group"><label for="pSubject" class="form-label">Subject *</label>
               <input type="text" id="pSubject" class="form-control" placeholder="e.g. Mathematics"/></div>
           </div>
           <div class="form-row">
-            <div class="form-group"><label class="form-label">NaCCA Strand</label>
+            <div class="form-group"><label for="pStrand" class="form-label">NaCCA Strand</label>
               <input type="text" id="pStrand" class="form-control" placeholder="e.g. Number &amp; Operations"/></div>
-            <div class="form-group"><label class="form-label">Sub-Strand</label>
+            <div class="form-group"><label for="pSubStrand" class="form-label">Sub-Strand</label>
               <input type="text" id="pSubStrand" class="form-control" placeholder="e.g. Fractions"/></div>
           </div>
           <div class="form-row">
-            <div class="form-group"><label class="form-label">CA Weight (%) — e.g. 30</label>
+            <div class="form-group"><label for="pCAW" class="form-label">CA Weight (%) — e.g. 30</label>
               <input type="number" id="pCAW" class="form-control" value="30" min="0" max="100"/></div>
-            <div class="form-group"><label class="form-label">Exam Weight (%) — e.g. 70</label>
+            <div class="form-group"><label for="pExamW" class="form-label">Exam Weight (%) — e.g. 70</label>
               <input type="number" id="pExamW" class="form-control" value="70" min="0" max="100"/></div>
           </div>
           <div style="display:flex;gap:10px;margin-top:6px;">
@@ -744,14 +744,14 @@ canvas.chart-canvas { width: 100% !important; }
           </div>
           <div class="tab-pane active" id="students-tab-add">
             <div class="form-row form-row-3">
-              <div class="form-group"><label class="form-label">Full Name *</label>
+              <div class="form-group"><label for="sName" class="form-label">Full Name *</label>
                 <input type="text" id="sName" class="form-control" placeholder="Student full name"/></div>
-              <div class="form-group"><label class="form-label">Gender *</label>
+              <div class="form-group"><label for="sGender" class="form-label">Gender *</label>
                 <select id="sGender" class="form-control">
                   <option value="Male">Male</option><option value="Female">Female</option>
                 </select></div>
               <div class="form-group">
-                <label class="form-label" style="display:flex;align-items:center;gap:8px;">
+                <label for="sIndexAuto" class="form-label" style="display:flex;align-items:center;gap:8px;">
                   Index Number
                   <span style="display:flex;align-items:center;gap:5px;margin-left:auto;font-weight:400;font-size:.75rem;color:var(--muted);">
                     <span>Auto</span>
@@ -774,17 +774,17 @@ canvas.chart-canvas { width: 100% !important; }
             <div id="sIndexFormatWrap" style="margin-bottom:14px;background:var(--dark2);border:1px solid var(--border);border-radius:10px;padding:12px;">
               <div style="font-size:.8rem;font-weight:700;margin-bottom:10px;color:var(--text2);">&#9881;&#65039; Auto-Index Format</div>
               <div class="form-row" style="margin-bottom:6px;">
-                <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:.75rem;">Prefix</label>
+                <div class="form-group" style="margin-bottom:0;"><label for="idxPrefix" class="form-label" style="font-size:.75rem;">Prefix</label>
                   <input type="text" id="idxPrefix" class="form-control" placeholder="GES" value="GES" oninput="updateIndexPreview()" style="font-size:.82rem;"/></div>
-                <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:.75rem;">Year (optional)</label>
+                <div class="form-group" style="margin-bottom:0;"><label for="idxYear" class="form-label" style="font-size:.75rem;">Year (optional)</label>
                   <input type="text" id="idxYear" class="form-control" placeholder="2024" oninput="updateIndexPreview()" style="font-size:.82rem;"/></div>
-                <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:.75rem;">Number Padding</label>
+                <div class="form-group" style="margin-bottom:0;"><label for="idxDigits" class="form-label" style="font-size:.75rem;">Number Padding</label>
                   <select id="idxDigits" class="form-control" onchange="updateIndexPreview()" style="font-size:.82rem;">
                     <option value="2">2 digits (01, 02…)</option>
                     <option value="3" selected>3 digits (001, 002…)</option>
                     <option value="4">4 digits (0001…)</option>
                   </select></div>
-                <div class="form-group" style="margin-bottom:0;"><label class="form-label" style="font-size:.75rem;">Start Number</label>
+                <div class="form-group" style="margin-bottom:0;"><label for="idxStart" class="form-label" style="font-size:.75rem;">Start Number</label>
                   <input type="number" id="idxStart" class="form-control" value="1" min="1" oninput="updateIndexPreview()" style="font-size:.82rem;"/></div>
               </div>
               <div style="font-size:.78rem;color:var(--muted);">
@@ -831,9 +831,9 @@ canvas.chart-canvas { width: 100% !important; }
         <div class="card">
           <div class="card-title"><span class="ct-icon">📝</span> New Assessment</div>
           <div class="form-row">
-            <div class="form-group"><label class="form-label">Name *</label>
+            <div class="form-group"><label for="aName" class="form-label">Name *</label>
               <input type="text" id="aName" class="form-control" placeholder="e.g. Class Exercise 1"/></div>
-            <div class="form-group"><label class="form-label">Category *</label>
+            <div class="form-group"><label for="aCategory" class="form-label">Category *</label>
               <select id="aCategory" class="form-control">
                 <option>Class Exercise</option><option>Quiz</option><option>Project Work</option>
                 <option>Midterm</option><option>Group Work</option><option>End of Term Exam</option>
@@ -841,14 +841,14 @@ canvas.chart-canvas { width: 100% !important; }
               </select></div>
           </div>
           <div class="form-row form-row-3">
-            <div class="form-group"><label class="form-label">Total Marks *</label>
+            <div class="form-group"><label for="aTotal" class="form-label">Total Marks *</label>
               <input type="number" id="aTotal" class="form-control" placeholder="100" min="1"/></div>
-            <div class="form-group"><label class="form-label">Type</label>
+            <div class="form-group"><label for="aType" class="form-label">Type</label>
               <select id="aType" class="form-control">
                 <option value="CA">Continuous Assessment</option>
                 <option value="Exam">End of Term Exam</option>
               </select></div>
-            <div class="form-group"><label class="form-label">Date</label>
+            <div class="form-group"><label for="aDate" class="form-label">Date</label>
               <input type="date" id="aDate" class="form-control"/></div>
           </div>
           <button class="btn btn-primary" onclick="addAssessment()">Create Assessment</button>
@@ -871,7 +871,7 @@ canvas.chart-canvas { width: 100% !important; }
           <div class="page-sub">Scores are auto-saved to Firebase as you type</div>
         </div>
         <div class="card">
-          <div class="form-group"><label class="form-label">Select Assessment *</label>
+          <div class="form-group"><label for="scoreAssessmentSel" class="form-label">Select Assessment *</label>
             <select id="scoreAssessmentSel" class="form-control" onchange="loadScoreSheet()" style="max-width:400px;">
               <option value="">— Choose an assessment —</option>
             </select></div>
@@ -948,18 +948,18 @@ canvas.chart-canvas { width: 100% !important; }
           <div class="card">
             <div class="card-title"><span class="ct-icon">📄</span> Report Options</div>
             <div class="form-row">
-              <div class="form-group"><label class="form-label">Report Type</label>
+              <div class="form-group"><label for="rptType" class="form-label">Report Type</label>
                 <select id="rptType" class="form-control">
                   <option value="class">Class Summary Report</option>
                   <option value="individual">Individual Student Reports</option>
                   <option value="broadsheet">Full Broadsheet</option>
                 </select></div>
-              <div class="form-group"><label class="form-label">Student (for individual)</label>
+              <div class="form-group"><label for="rptStudent" class="form-label">Student (for individual)</label>
                 <select id="rptStudent" class="form-control">
                   <option value="">All Students</option>
                 </select></div>
             </div>
-            <div class="form-group"><label class="form-label">Additional Notes</label>
+            <div class="form-group"><label for="rptNotes" class="form-label">Additional Notes</label>
               <textarea id="rptNotes" class="form-control" rows="2" placeholder="Any extra comments for this report…"></textarea></div>
             <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;">
               <button class="btn btn-primary" onclick="downloadReport()">📥 Download Report</button>
@@ -982,20 +982,20 @@ canvas.chart-canvas { width: 100% !important; }
               <strong>Print → Save as PDF</strong> to get the full PDF file.
             </p>
             <div class="form-row">
-              <div class="form-group"><label class="form-label">Include Students</label>
+              <div class="form-group"><label for="bulkFilter" class="form-label">Include Students</label>
                 <select id="bulkFilter" class="form-control">
                   <option value="all">All Students</option>
                   <option value="passed">Passed Only (Grade A–E)</option>
                   <option value="failed">Failed Only (Grade F)</option>
                   <option value="gradeA">Grade A Only</option>
                 </select></div>
-              <div class="form-group"><label class="form-label">Report Style</label>
+              <div class="form-group"><label for="bulkStyle" class="form-label">Report Style</label>
                 <select id="bulkStyle" class="form-control">
                   <option value="card">Individual Report Cards (1 per page)</option>
                   <option value="summary">Class Summary + All Students</option>
                 </select></div>
             </div>
-            <div class="form-group"><label class="form-label">Head Teacher / Principal's Note (optional)</label>
+            <div class="form-group"><label for="bulkNote" class="form-label">Head Teacher / Principal's Note (optional)</label>
               <textarea id="bulkNote" class="form-control" rows="2" placeholder="e.g. Congratulations to all students on a successful term…"></textarea></div>
             <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;">
               <button class="btn btn-primary" onclick="generateBulkPDF()">🖨️ Generate Bulk PDF</button>
@@ -1018,11 +1018,11 @@ canvas.chart-canvas { width: 100% !important; }
               Select a student below — a formatted message will be generated automatically.
             </p>
             <div class="form-row">
-              <div class="form-group"><label class="form-label">Select Student *</label>
+              <div class="form-group"><label for="waStudent" class="form-label">Select Student *</label>
                 <select id="waStudent" class="form-control" onchange="previewWhatsApp()">
                   <option value="">— Choose a student —</option>
                 </select></div>
-              <div class="form-group"><label class="form-label">Parent Phone Number</label>
+              <div class="form-group"><label for="waCountry" class="form-label">Parent Phone Number</label>
                 <div style="display:flex;gap:6px;">
                   <select id="waCountry" class="form-control" style="max-width:110px;">
                     <option value="233">🇬🇭 +233</option>
@@ -1034,7 +1034,7 @@ canvas.chart-canvas { width: 100% !important; }
                 </div>
               </div>
             </div>
-            <div class="form-group"><label class="form-label">Extra Message (optional)</label>
+            <div class="form-group"><label for="waExtra" class="form-label">Extra Message (optional)</label>
               <input type="text" id="waExtra" class="form-control" placeholder="e.g. Please see teacher for further discussion" oninput="previewWhatsApp()"/></div>
           </div>
           <div class="card" id="waPreviewCard" style="display:none;">
@@ -1108,15 +1108,15 @@ canvas.chart-canvas { width: 100% !important; }
         <div class="card">
           <div class="card-title"><span class="ct-icon">📊</span> Select Terms to Compare</div>
           <div class="form-row">
-            <div class="form-group"><label class="form-label" id="tcBaseLabel2">Base (Earlier)</label>
+            <div class="form-group"><label for="tcBaseTerm" class="form-label" id="tcBaseLabel2">Base (Earlier)</label>
               <select id="tcBaseTerm" class="form-control">
                 <option value="Term 1">Term 1</option><option value="Term 2">Term 2</option>
               </select></div>
-            <div class="form-group"><label class="form-label" id="tcCompLabel2">Compare (Later)</label>
+            <div class="form-group"><label for="tcCompareTerm" class="form-label" id="tcCompLabel2">Compare (Later)</label>
               <select id="tcCompareTerm" class="form-control">
                 <option value="Term 2">Term 2</option><option value="Term 3">Term 3</option>
               </select></div>
-            <div class="form-group"><label class="form-label">Academic Year</label>
+            <div class="form-group"><label for="tcYear" class="form-label">Academic Year</label>
               <input type="text" id="tcYear" class="form-control" placeholder="2024/2025"/></div>
           </div>
           <button class="btn btn-primary" onclick="runTermComparison()">📊 Compare Now</button>
@@ -1222,9 +1222,9 @@ canvas.chart-canvas { width: 100% !important; }
           <div class="tab-pane active" id="timetable-tab-builder">
             <!-- Basic info -->
             <div class="form-row" style="margin-bottom:14px;">
-              <div class="form-group"><label class="form-label">Class Name</label>
+              <div class="form-group"><label for="ttClass" class="form-label">Class Name</label>
                 <input type="text" id="ttClass" class="form-control" placeholder="e.g. Form 2 Science A"/></div>
-              <div class="form-group"><label class="form-label">Academic Year</label>
+              <div class="form-group"><label for="ttYear" class="form-label">Academic Year</label>
                 <input type="text" id="ttYear" class="form-control" placeholder="2024/2025"/></div>
             </div>
 
@@ -1377,12 +1377,12 @@ canvas.chart-canvas { width: 100% !important; }
         </div>
         <div class="card" id="noticePostCard">
           <div class="card-title"><span class="ct-icon">📋</span> Post a Notice</div>
-          <div class="form-group"><label class="form-label">Title *</label>
+          <div class="form-group"><label for="noticeTitle" class="form-label">Title *</label>
             <input type="text" id="noticeTitle" class="form-control" placeholder="e.g. Staff Meeting — Friday 3PM"/></div>
-          <div class="form-group"><label class="form-label">Message *</label>
+          <div class="form-group"><label for="noticeBody" class="form-label">Message *</label>
             <textarea id="noticeBody" class="form-control" rows="3" placeholder="Type your notice here…"></textarea></div>
           <div class="form-row">
-            <div class="form-group"><label class="form-label">Category</label>
+            <div class="form-group"><label for="noticeCategory" class="form-label">Category</label>
               <select id="noticeCategory" class="form-control">
                 <option value="general">📢 General</option>
                 <option value="urgent">🚨 Urgent</option>
@@ -1391,7 +1391,7 @@ canvas.chart-canvas { width: 100% !important; }
                 <option value="exam">📝 Exams</option>
                 <option value="welfare">❤️ Staff Welfare</option>
               </select></div>
-            <div class="form-group"><label class="form-label">Visible To</label>
+            <div class="form-group"><label for="noticeAudience" class="form-label">Visible To</label>
               <select id="noticeAudience" class="form-control">
                 <option value="all">All Staff</option>
                 <option value="teacher">Teachers Only</option>
@@ -1514,13 +1514,13 @@ canvas.chart-canvas { width: 100% !important; }
     <button class="modal-close" onclick="closeModal('editStuModal')">✕</button>
     <div class="modal-title">✏️ Edit Student</div>
     <input type="hidden" id="editStuId"/>
-    <div class="form-group"><label class="form-label">Full Name</label>
+    <div class="form-group"><label for="editStuName" class="form-label">Full Name</label>
       <input type="text" id="editStuName" class="form-control"/></div>
     <div class="form-row">
-      <div class="form-group"><label class="form-label">Gender</label>
+      <div class="form-group"><label for="editStuGender" class="form-label">Gender</label>
         <select id="editStuGender" class="form-control"><option>Male</option><option>Female</option></select></div>
       <div class="form-group">
-        <label class="form-label" style="display:flex;align-items:center;gap:8px;">
+        <label for="editStuIndex" class="form-label" style="display:flex;align-items:center;gap:8px;">
           Index Number
           <button class="btn btn-sm btn-outline" style="margin-left:auto;font-size:.72rem;padding:3px 8px;"
             onclick="autoFillEditIndex()">&#128258; Auto-fill</button>
@@ -1556,7 +1556,7 @@ canvas.chart-canvas { width: 100% !important; }
     <button class="modal-close" onclick="closeModal('roleModal')">✕</button>
     <div class="modal-title">🔧 Change User Role</div>
     <input type="hidden" id="roleModalUserId"/>
-    <div class="form-group"><label class="form-label">New Role</label>
+    <div class="form-group"><label for="roleModalSelect" class="form-label">New Role</label>
       <select id="roleModalSelect" class="form-control">
         <option value="teacher">Teacher</option>
         <option value="headteacher">Head Teacher</option>
@@ -1819,8 +1819,12 @@ async function startApp() {
     subscribeAssessments(),
   ]);
   if (isAdmin()) {
-    subscribeAllUsers();
+    subscribeAllUsers();        // Full user list with pending counts for admin
     subscribeSchoolOverview();
+  } else if (isHeadTeacher()) {
+    subscribeAllUsers();        // Head teachers also need full list for approvals
+  } else {
+    subscribeApprovedUsers();   // Regular teachers only need approved colleagues
   }
   subscribeNotifications();
   subscribeMessages();
@@ -1943,7 +1947,17 @@ function showPage(page) {
     promotion: renderPromotionTable,
     league: buildLeagueTable,
     timetable: loadMyTimetable,
-    messaging: () => { renderMsgContacts(); },
+    messaging: () => {
+      // If ALL_USERS not loaded yet (snapshot still pending), show loading then retry
+      if (!ALL_USERS.length) {
+        const el = eid('msgContactList');
+        if (el) el.innerHTML = '<div style="padding:16px;text-align:center;font-size:.82rem;color:var(--muted);">Loading staff…</div>';
+        // Retry once snapshot fires (subscribeAllUsers/subscribeApprovedUsers will call renderMsgContacts)
+        setTimeout(renderMsgContacts, 2000);
+      } else {
+        renderMsgContacts();
+      }
+    },
     notices: renderNoticeBoard,
     photos: renderPhotoGrid,
     approvals: renderApprovals,
@@ -2798,7 +2812,7 @@ function renderGradingRows() {
 function renderCommentRows() {
   eid('commentRows').innerHTML = GRADING.map(g => `
     <div class="form-group">
-      <label class="form-label"><span class="grade-pill g${g.grade}" style="margin-right:6px;">${g.grade}</span> ${g.label}</label>
+      <label for="cmt_${g.grade}" class="form-label"><span class="grade-pill g${g.grade}" style="margin-right:6px;">${g.grade}</span> ${g.label}</label>
       <textarea class="form-control" id="cmt_${g.grade}" rows="2">${COMMENTS[g.grade]||''}</textarea>
     </div>`).join('');
 }
@@ -2838,6 +2852,19 @@ function subscribeAllUsers() {
     updatePendingCount();
     if (eid('page-users').classList.contains('active')) renderUserTable();
     if (eid('page-approvals').classList.contains('active')) renderApprovals();
+    // Also refresh messaging contacts whenever user list updates (for all roles)
+    if (eid('page-messaging').classList.contains('active')) renderMsgContacts();
+  });
+  UNSUBSCRIBERS.push(unsub);
+}
+
+function subscribeApprovedUsers() {
+  // For regular teachers — load approved colleagues for messaging/notices
+  const { db, collection, query, where, onSnapshot } = window.FB;
+  const q = query(collection(db, 'users'), where('status', '==', 'approved'));
+  const unsub = onSnapshot(q, snap => {
+    ALL_USERS = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    if (eid('page-messaging').classList.contains('active')) renderMsgContacts();
   });
   UNSUBSCRIBERS.push(unsub);
 }
@@ -4563,14 +4590,17 @@ let MSG_UNSUB = null;
 let UNREAD_MSG_COUNT = 0;
 
 function subscribeMessages() {
-  // Subscribe to incoming messages for notification count
+  // Watch all messages sent TO me — counts unread badge, also refreshes contacts
   if (!window.FB?.db) return;
   const { db, collection, query, where, onSnapshot } = window.FB;
-  const q = query(collection(db, 'messages'), where('toUid', '==', myUid()), where('read', '==', false));
+  const q = query(collection(db, 'messages'), where('toUid', '==', myUid()));
   const unsub = onSnapshot(q, snap => {
-    UNREAD_MSG_COUNT = snap.size;
+    UNREAD_MSG_COUNT = snap.docs.filter(d => !d.data().read).length;
     const el = eid('unreadMsgCount');
     if (el) el.textContent = UNREAD_MSG_COUNT > 0 ? UNREAD_MSG_COUNT : '0';
+    // If messaging page is open and a new message arrives from the active chat sender,
+    // the openChat listener handles it — but refresh contact list for unread indicators
+    if (eid('page-messaging').classList.contains('active')) renderMsgContacts();
   });
   UNSUBSCRIBERS.push(unsub);
 }
@@ -4578,33 +4608,56 @@ function subscribeMessages() {
 function renderMsgContacts() {
   const el = eid('msgContactList');
   if (!el) return;
+
+  const me = myUid();
   const q = (eid('msgSearch')?.value || '').toLowerCase();
-  const contacts = ALL_USERS.filter(u =>
-    u.uid !== myUid() && u.status === 'approved' &&
-    (u.name||'').toLowerCase().includes(q)
-  );
+
+  // Use u.uid if set, otherwise fall back to doc id — handles manually created admin accounts
+  const contacts = ALL_USERS.filter(u => {
+    const theirUid = u.uid || u.id;
+    if (theirUid === me) return false;                     // exclude self
+    if (u.status && u.status !== 'approved') return false; // exclude pending/suspended
+    if (q && !(u.name||'').toLowerCase().includes(q)) return false;
+    return true;
+  });
+
   if (!contacts.length) {
-    el.innerHTML = '<div style="padding:16px;text-align:center;font-size:.82rem;color:var(--muted);">No staff found</div>';
+    // If ALL_USERS is empty, data hasn't loaded yet — show loading not "no staff"
+    const msg = ALL_USERS.length === 0
+      ? 'Loading staff list…'
+      : 'No other approved staff found';
+    el.innerHTML = `<div style="padding:16px;text-align:center;font-size:.82rem;color:var(--muted);">${msg}</div>`;
     return;
   }
+
   el.innerHTML = contacts.map(u => {
-    const initials = (u.name||'?').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
-    const roleClass = { teacher:'role-teacher', headteacher:'role-headteacher', admin:'role-admin' }[u.role] || 'role-teacher';
-    const isActive = ACTIVE_CHAT_UID === u.uid;
-    return `<div onclick="openChat('${u.uid}','${u.name||''}','${u.role||''}')"
+    const uid = u.uid || u.id;
+    const name = u.name || 'Unknown';
+    const role = u.role || 'teacher';
+    const initials = name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+    const roleClass = { teacher:'role-teacher', headteacher:'role-headteacher', admin:'role-admin' }[role] || 'role-teacher';
+    const isActive = ACTIVE_CHAT_UID === uid;
+    const bg = isActive ? 'var(--dark3)' : 'transparent';
+    const safeName = name.replace(/'/g, '&#39;');
+    return `<div onclick="openChat('${uid}','${safeName}','${role}')"
       style="display:flex;align-items:center;gap:10px;padding:10px;border-radius:8px;cursor:pointer;
-      background:${isActive ? 'var(--dark3)' : 'transparent'};margin-bottom:2px;transition:background .2s;"
-      onmouseover="this.style.background='var(--dark3)'" onmouseout="this.style.background='${isActive?'var(--dark3)':'transparent'}'">
+      background:${bg};margin-bottom:2px;transition:background .2s;"
+      onmouseenter="this.style.background='var(--dark3)'" onmouseleave="this.style.background='${bg}'">
       <div class="avatar" style="width:34px;height:34px;font-size:.78rem;flex-shrink:0;">${initials}</div>
       <div style="flex:1;min-width:0;">
-        <div style="font-weight:600;font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${u.name}</div>
-        <span class="role-chip ${roleClass}" style="font-size:.68rem;padding:2px 7px;">${u.role}</span>
+        <div style="font-weight:600;font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${name}</div>
+        <span class="role-chip ${roleClass}" style="font-size:.68rem;padding:2px 7px;">${role}</span>
       </div>
     </div>`;
   }).join('');
 }
 
 function filterMsgContacts() { renderMsgContacts(); }
+
+// Build a stable conversation ID from two UIDs (alphabetical so both sides get same ID)
+function convoId(uid1, uid2) {
+  return [uid1, uid2].sort().join('__');
+}
 
 async function openChat(uid, name, role) {
   ACTIVE_CHAT_UID = uid;
@@ -4613,25 +4666,32 @@ async function openChat(uid, name, role) {
   const header = eid('msgChatHeader');
   if (header) header.innerHTML = `<div class="avatar" style="width:30px;height:30px;font-size:.75rem;margin-right:8px;">${name.split(' ').map(w=>w[0]).join('').substring(0,2)}</div> ${name} <span class="role-chip role-${role}" style="margin-left:8px;font-size:.72rem;">${role}</span>`;
 
-  // Unsubscribe previous listener
+  const body = eid('msgChatBody');
+  if (body) body.innerHTML = '<div style="text-align:center;padding:30px;font-size:.85rem;color:var(--muted);">Loading messages…</div>';
+
   if (MSG_UNSUB) { MSG_UNSUB(); MSG_UNSUB = null; }
 
-  // Subscribe to this conversation in real-time
-  const { db, collection, query, where, orderBy, onSnapshot, doc, updateDoc } = window.FB;
+  const { db, collection, query, where, onSnapshot, doc, updateDoc } = window.FB;
   const myId = myUid();
-  // Messages between me and this contact
-  const q = query(
-    collection(db, 'messages'),
-    where('participants', 'array-contains', myId),
-    orderBy('createdAt', 'asc')
-  );
-  MSG_UNSUB = onSnapshot(q, snap => {
-    const msgs = snap.docs
-      .map(d => ({ id: d.id, ...d.data() }))
-      .filter(m => m.participants && m.participants.includes(uid));
 
-    const body = eid('msgChatBody');
+  // Two simple single-field queries — no composite index required.
+  // Q1: messages I sent to them  Q2: messages they sent to me
+  // We merge and sort client-side by createdAt.
+  let sentMsgs = [];
+  let recvMsgs = [];
+  let listeners = 0;
+
+  function renderChat() {
     if (!body) return;
+    // Merge both arrays, deduplicate by id, sort by createdAt timestamp
+    const allMap = {};
+    [...sentMsgs, ...recvMsgs].forEach(m => allMap[m.id] = m);
+    const msgs = Object.values(allMap).sort((a, b) => {
+      const ta = a.createdAt?.toMillis?.() ?? a.createdAt?.seconds * 1000 ?? 0;
+      const tb = b.createdAt?.toMillis?.() ?? b.createdAt?.seconds * 1000 ?? 0;
+      return ta - tb;
+    });
+
     if (!msgs.length) {
       body.innerHTML = '<div style="text-align:center;padding:30px;font-size:.85rem;color:var(--muted);">No messages yet. Say hello! 👋</div>';
       return;
@@ -4639,23 +4699,50 @@ async function openChat(uid, name, role) {
 
     body.innerHTML = msgs.map(m => {
       const isMe = m.fromUid === myId;
-      const time = m.createdAt?.toDate?.().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) || '';
-      return `<div style="display:flex;justify-content:${isMe?'flex-end':'flex-start'};">
-        <div style="max-width:72%;padding:9px 13px;border-radius:${isMe?'14px 14px 4px 14px':'14px 14px 14px 4px'};
-          background:${isMe?'var(--gh-green)':'var(--card)'};color:${isMe?'#fff':'var(--text)'};
+      const time = m.createdAt?.toDate?.().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) || '';
+      return `<div style="display:flex;justify-content:${isMe ? 'flex-end' : 'flex-start'};margin-bottom:4px;">
+        <div style="max-width:72%;padding:9px 13px;
+          border-radius:${isMe ? '14px 14px 4px 14px' : '14px 14px 14px 4px'};
+          background:${isMe ? 'var(--gh-green)' : 'var(--card)'};
+          color:${isMe ? '#fff' : 'var(--text)'};
           font-size:.86rem;line-height:1.5;box-shadow:0 2px 8px rgba(0,0,0,.2);">
           ${m.text}
-          <div style="font-size:.68rem;opacity:.6;margin-top:3px;text-align:right;">${time}${isMe?' ✓':''}</div>
+          <div style="font-size:.68rem;opacity:.6;margin-top:3px;text-align:right;">${time}${isMe ? ' ✓' : ''}</div>
         </div>
       </div>`;
     }).join('');
     body.scrollTop = body.scrollHeight;
 
-    // Mark incoming as read
+    // Mark unread incoming messages as read
     msgs.filter(m => m.toUid === myId && !m.read).forEach(m => {
-      updateDoc(doc(db, 'messages', m.id), { read: true }).catch(()=>{});
+      updateDoc(doc(db, 'messages', m.id), { read: true }).catch(() => {});
     });
+  }
+
+  // Q1 — all messages I sent (fromUid == me), filter to this contact client-side
+  const qSent = query(collection(db, 'messages'),
+    where('fromUid', '==', myId)
+  );
+  // Q2 — all messages sent to me (toUid == me), filter from this contact client-side
+  const qRecv = query(collection(db, 'messages'),
+    where('toUid', '==', myId)
+  );
+
+  const unsubSent = onSnapshot(qSent, snap => {
+    sentMsgs = snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .filter(m => m.toUid === uid);   // only this conversation
+    renderChat();
   });
+  const unsubRecv = onSnapshot(qRecv, snap => {
+    recvMsgs = snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .filter(m => m.fromUid === uid); // only this conversation
+    renderChat();
+  });
+
+  // Store both unsubscribers so we can clean up when switching chats
+  MSG_UNSUB = () => { unsubSent(); unsubRecv(); };
 }
 
 async function sendMessage() {
@@ -4669,13 +4756,11 @@ async function sendMessage() {
   await setDoc(doc(db, 'messages', id), {
     fromUid: myId,
     toUid: ACTIVE_CHAT_UID,
-    participants: [myId, ACTIVE_CHAT_UID],
     text, read: false,
     fromName: USER_DOC?.name || '',
     createdAt: serverTimestamp(),
   });
   if (input) input.value = '';
-  // Also send a notification
   const recipient = ALL_USERS.find(u => u.uid === ACTIVE_CHAT_UID);
   await sendNotification(ACTIVE_CHAT_UID,
     '💬 New message from ' + (USER_DOC?.name || 'a colleague'),
