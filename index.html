@@ -733,6 +733,312 @@ canvas.chart-canvas { width: 100% !important; }
   .card { border: 1px solid #ccc; page-break-inside: avoid; }
 }
 
+/* ══════════════════════════════════════════════════════
+   RESPONSIVE OVERHAUL — No bleeds on any screen size
+   Targets: mobile phones, tablets, desktops
+══════════════════════════════════════════════════════ */
+
+/* ── SAFE AREA / VIEWPORT ── */
+body { overflow-x: hidden; }
+.content { overflow-x: hidden; }
+
+/* ── TOPBAR — tighter on very small phones ── */
+@media(max-width:390px) {
+  .topbar { padding: 0 8px; gap: 5px; }
+  .brand-flag { display: none; }
+  .brand-text h2 { font-size: .82rem; }
+  .brand-text p  { display: none; }
+  .avatar { width: 30px; height: 30px; font-size: .72rem; }
+  .btn-icon { padding: 4px 6px; }
+}
+
+/* ── SIDEBAR — full-height, no bleed ── */
+.sidebar { max-height: calc(100dvh - var(--topbar-h)); }
+
+/* ── CONTENT — proper insets on all sides ── */
+.content {
+  padding-left:  clamp(12px, 4vw, 28px);
+  padding-right: clamp(12px, 4vw, 28px);
+  padding-top:   clamp(14px, 3vw, 28px);
+  /* bottom handled separately with bottom-nav offset */
+}
+
+/* ── FORM ROWS — proper gap when stacked ── */
+@media(max-width:600px) {
+  .form-row, .form-row-3 {
+    grid-template-columns: 1fr;
+    gap: 0; /* form-groups already have margin-bottom */
+  }
+  /* Give select elements room to breathe */
+  select.form-control { font-size: 16px; }
+}
+
+/* ── STAT GRID — 2 columns minimum, never 1 ── */
+.stat-grid {
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+}
+@media(max-width:360px) {
+  .stat-grid { grid-template-columns: 1fr 1fr; gap: 9px; }
+  .stat-value { font-size: 1.45rem; }
+}
+
+/* ── ANALYSIS PAGE — 2 charts stack on mobile ── */
+.chart-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media(max-width:700px) {
+  .chart-2col { grid-template-columns: 1fr; }
+}
+
+/* ── ANALYSIS SUMMARY — stack on mobile ── */
+.analysis-summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+@media(max-width:600px) {
+  .analysis-summary-grid { grid-template-columns: 1fr; gap: 14px; }
+}
+
+/* ── DASHBOARD GRID — responsive ── */
+#dash-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)) !important;
+  gap: 14px !important;
+}
+
+/* ── TABLES — horizontal scroll with shadow cue ── */
+.table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  /* Scroll shadow: tells users there's more to scroll */
+  background:
+    linear-gradient(to right, var(--card) 20px, transparent) left,
+    linear-gradient(to left,  var(--card) 20px, transparent) right,
+    radial-gradient(farthest-side at 0   50%, rgba(0,0,0,.2), transparent) left,
+    radial-gradient(farthest-side at 100% 50%, rgba(0,0,0,.2), transparent) right;
+  background-repeat: no-repeat;
+  background-size: 40px 100%, 40px 100%, 12px 100%, 12px 100%;
+  background-attachment: local, local, scroll, scroll;
+}
+/* Compact table columns on mobile */
+@media(max-width:600px) {
+  td, th { padding: 9px 8px; font-size: .8rem; }
+  .grade-pill { padding: 2px 7px; font-size: .7rem; }
+  /* Score sheet: smaller inputs */
+  .score-input { width: 52px !important; font-size: .8rem; padding: 5px 4px; }
+}
+
+/* ── CARDS — no horizontal overflow ── */
+.card { overflow-x: hidden; word-break: break-word; }
+
+/* ── PAGE ACTIONS — wrap properly ── */
+.page-actions { flex-wrap: wrap; gap: 8px; }
+@media(max-width:480px) {
+  .page-actions .btn { flex: 1 1 auto; min-width: 120px; }
+}
+
+/* ── SEARCH BAR — full width on mobile ── */
+.search-bar {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.search-bar .form-control { min-width: 0; flex: 1 1 150px; }
+.search-bar select { flex: 0 1 auto; min-width: 100px; max-width: 160px; }
+
+/* ── APPROVAL ITEMS — wrap on mobile ── */
+@media(max-width:500px) {
+  .approval-item { flex-wrap: wrap; }
+  .approval-actions { width: 100%; justify-content: flex-end; margin-top: 6px; }
+}
+
+/* ── MODAL — full-width on small phones ── */
+@media(max-width:380px) {
+  .modal { padding: 16px 14px; }
+  .modal-title { font-size: .95rem; }
+}
+
+/* ══════════════════════════════════
+   MESSAGING — no fixed heights, no overflow
+══════════════════════════════════ */
+#msgLayout {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  /* Let it fill available vertical space */
+  height: calc(100dvh - var(--topbar-h) - 160px);
+  min-height: 400px;
+  max-height: 720px;
+}
+#msgLayout > div { /* inner row/col wrapper */
+  display: flex;
+  flex: 1;
+  min-height: 0; /* crucial — allows flex children to shrink */
+  overflow: hidden;
+}
+#msgContactsPanel {
+  width: 220px;
+  min-width: 180px;
+  max-width: 240px;
+  flex-shrink: 0;
+  background: var(--card);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+#msgChatPanel {
+  flex: 1;
+  min-width: 0; /* prevents overflow */
+  display: flex;
+  flex-direction: column;
+  background: var(--dark2);
+  overflow: hidden;
+}
+#msgChatBody {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+#msgContactList {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 6px;
+  min-height: 0;
+}
+#msgChatHeader {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--card);
+  font-weight: 700;
+  font-size: .88rem;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.msg-input-bar {
+  padding: 10px 12px;
+  border-top: 1px solid var(--border);
+  background: var(--card);
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+/* Mobile: stack contacts above chat */
+@media(max-width:640px) {
+  #msgLayout {
+    height: calc(100dvh - var(--topbar-h) - var(--bnav-h) - 130px);
+    min-height: 480px;
+  }
+  #msgLayout > div { flex-direction: column !important; overflow: visible; }
+  #msgContactsPanel {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    max-height: 190px !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  #msgChatPanel { flex: 1; min-height: 0; }
+  /* Message bubbles full width */
+  #msgChatBody > div { max-width: 100% !important; }
+}
+/* Message bubble max-width */
+#msgChatBody .msg-bubble { max-width: 75%; }
+@media(max-width:480px) { #msgChatBody .msg-bubble { max-width: 88%; } }
+
+/* ══════════════════════════════════
+   PHOTO GRID — responsive columns
+══════════════════════════════════ */
+#photoGrid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
+  gap: 12px !important;
+}
+@media(max-width:400px) {
+  #photoGrid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+}
+
+/* ══════════════════════════════════
+   BOTTOM NAV — safe area + no bleed
+══════════════════════════════════ */
+#mobileBottomNav {
+  /* Ensure it never clips content or appears over modals */
+  z-index: 80;
+  padding-left:  env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+/* Enough room so content doesn't hide behind bottom nav */
+@media(max-width:768px) {
+  .content { padding-bottom: calc(var(--bnav-h) + 16px + env(safe-area-inset-bottom, 0px)); }
+  .toast-wrap { bottom: calc(var(--bnav-h) + 8px + env(safe-area-inset-bottom, 0px)); }
+}
+
+/* ══════════════════════════════════
+   TABLET — 769px to 1024px
+   Sidebar shows, content fills well
+══════════════════════════════════ */
+@media(min-width:769px) and (max-width:1024px) {
+  .sidebar { width: 200px; min-width: 200px; }
+  .content { padding: 18px 20px; }
+  .stat-grid { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+  .card { padding: 16px; }
+}
+
+/* ══════════════════════════════════
+   DESKTOP — 1025px+
+   Comfortable reading widths
+══════════════════════════════════ */
+@media(min-width:1025px) {
+  .sidebar { width: 240px; min-width: 240px; }
+  .content { padding: 28px 32px; }
+  .page-title { font-size: 1.7rem; }
+}
+@media(min-width:1400px) {
+  .content { padding: 32px 40px; }
+}
+
+/* ══════════════════════════════════
+   MISC FIXES
+══════════════════════════════════ */
+/* Prevent any element from causing horizontal scroll */
+* { max-width: 100%; }
+img, canvas, video { max-width: 100%; height: auto; }
+canvas.chart-canvas { max-width: 100% !important; height: auto !important; }
+
+/* Inline grids that bleed — override to be responsive */
+[style*="grid-template-columns:1fr 1fr"] {
+  /* Can't easily override inline, handled per-element below */
+}
+
+/* Tab bar on very small screens */
+@media(max-width:360px) {
+  .tab-btn { padding: 7px 11px; font-size: .78rem; }
+}
+
+/* Buttons don't overflow on small screens */
+@media(max-width:480px) {
+  .btn { font-size: .82rem; padding: 10px 14px; }
+  .btn-sm { padding: 6px 10px; font-size: .76rem; }
+}
+
+/* Hide logout in topbar (it's in sidebar) */
+#logoutBtnTop { display: none !important; }
+
+/* ── END RESPONSIVE OVERHAUL ── */
 /* ── END STYLES ── */
 </style>
 </head>
@@ -1199,7 +1505,7 @@ canvas.chart-canvas { width: 100% !important; }
         </div>
         <div class="card">
           <div class="form-group"><label for="scoreAssessmentSel" class="form-label">Select Assessment *</label>
-            <select id="scoreAssessmentSel" class="form-control" onchange="loadScoreSheet()" style="max-width:400px;">
+            <select id="scoreAssessmentSel" class="form-control" onchange="loadScoreSheet()" style="max-width:100%;">
               <option value="">— Choose an assessment —</option>
             </select></div>
         </div>
@@ -1246,7 +1552,7 @@ canvas.chart-canvas { width: 100% !important; }
           <div class="page-sub">Automated insights from Firebase data</div>
         </div>
         <div class="stat-grid" id="analysisStats"></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+        <div style="class="chart-2col">
           <div class="card"><div class="card-title"><span class="ct-icon">📊</span> Grade Distribution</div>
             <div class="chart-wrap"><canvas id="gradeChart" class="chart-canvas" height="200"></canvas></div></div>
           <div class="card"><div class="card-title"><span class="ct-icon">📈</span> Score Ranges</div>
@@ -1677,38 +1983,31 @@ canvas.chart-canvas { width: 100% !important; }
           <div class="page-sub">Direct messages between teachers · Synced via Firebase</div>
         </div>
         <!-- Responsive: stack on mobile, side-by-side on desktop -->
-        <div id="msgLayout" style="border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;">
+        <div id="msgLayout">
           <!-- On desktop: row layout -->
-          <div style="display:flex;flex:1;min-height:0;">
+          <div>
             <!-- Contacts panel -->
-            <div id="msgContactsPanel" style="width:240px;min-width:240px;background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;max-height:560px;">
+            <div id="msgContactsPanel">
               <div style="padding:10px;border-bottom:1px solid var(--border);">
                 <input type="text" id="msgSearch" class="form-control" placeholder="🔍 Search staff…" oninput="filterMsgContacts()" style="font-size:.82rem;"/>
               </div>
-              <div id="msgContactList" style="flex:1;overflow-y:auto;padding:6px;"></div>
+              <div id="msgContactList"></div>
             </div>
             <!-- Chat panel -->
-            <div id="msgChatPanel" style="flex:1;display:flex;flex-direction:column;background:var(--dark2);min-height:520px;">
-              <div id="msgChatHeader" style="padding:10px 14px;border-bottom:1px solid var(--border);background:var(--card);font-weight:700;font-size:.88rem;min-height:48px;display:flex;align-items:center;gap:8px;">
+            <div id="msgChatPanel">
+              <div id="msgChatHeader">
                 <span style="flex:1;color:var(--muted);font-weight:500;font-size:.85rem;">Select a staff member to start messaging</span>
               </div>
-              <div id="msgChatBody" style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;min-height:360px;"></div>
-              <div style="padding:10px 12px;border-top:1px solid var(--border);background:var(--card);display:flex;gap:8px;">
+              <div id="msgChatBody"></div>
+              <div class="msg-input-bar">
                 <input type="text" id="msgInput" class="form-control" placeholder="Type a message…"
-                  onkeydown="if(event.key==='Enter')sendMessage()" style="flex:1;font-size:.87rem;"/>
-                <button class="btn btn-primary btn-sm" onclick="sendMessage()">Send ➤</button>
+                  onkeydown="if(event.key==='Enter')sendMessage()" style="flex:1;font-size:.87rem;min-width:0;"/>
+                <button class="btn btn-primary btn-sm" onclick="sendMessage()" style="flex-shrink:0;">Send ➤</button>
               </div>
             </div>
           </div>
         </div>
-        <!-- Mobile responsive style override -->
-        <style>
-          @media(max-width:600px) {
-            #msgContactsPanel { width:100% !important; min-width:0 !important; max-height:200px !important; border-right:none !important; border-bottom:1px solid var(--border); }
-            #msgLayout > div { flex-direction:column !important; }
-            #msgChatPanel { min-height:300px !important; }
-          }
-        </style>
+
       </div>
 
       <!-- ═════ NOTICE BOARD ═════ -->
@@ -1800,7 +2099,7 @@ canvas.chart-canvas { width: 100% !important; }
           <div class="search-bar">
             <input type="text" class="form-control" id="photoSearch" placeholder="🔍 Search student…" oninput="renderPhotoGrid()"/>
           </div>
-          <div id="photoGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px;margin-top:14px;"></div>
+          <div id="photoGrid" style="margin-top:14px;"></div>
         </div>
       </div>
 
@@ -3075,7 +3374,7 @@ async function renderAnalysis() {
 
   const top3 = [...rows].sort((a,b) => b.t.overall-a.t.overall).slice(0,3);
   eid('analysisSummary').innerHTML = `
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;flex-wrap:wrap;">
+    <div class="analysis-summary-grid">
       <div>
         <h4 style="margin-bottom:12px;font-size:.9rem;">🏆 Top Performers</h4>
         ${top3.map((r,i) => `<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
@@ -3695,16 +3994,16 @@ async function renderDashboard() {
     const pending = ALL_USERS.filter(u => u.status === 'pending').length;
     eid('schoolOverview').innerHTML = `
       <div class="inline-flex" style="flex-wrap:wrap;gap:14px;">
-        <div class="stat-card green" style="min-width:130px;">
+        <div class="stat-card green">
           <div class="stat-value">${ALL_USERS.filter(u=>u.status==='approved').length}</div>
           <div class="stat-label">Active Teachers</div>
         </div>
-        <div class="stat-card gold" style="min-width:130px;">
+        <div class="stat-card gold">
           <div class="stat-value">${pending}</div>
           <div class="stat-label">Pending Approval</div>
           ${pending?`<div class="stat-sub"><a href="#" onclick="showPage('users')">Review now →</a></div>`:''}
         </div>
-        <div class="stat-card blue" style="min-width:130px;">
+        <div class="stat-card blue">
           <div class="stat-value">${[...new Set(ALL_USERS.map(u=>u.school).filter(Boolean))].length}</div>
           <div class="stat-label">Schools</div>
         </div>
@@ -4701,7 +5000,7 @@ async function buildLeagueTable() {
   const medals = ['🥇','🥈','🥉'];
   const tbody = eid('leagueTable');
   tbody.innerHTML = filtered.map((r,i) => {
-    const bar = `<div class="progress-bar" style="width:120px;display:inline-block;">
+    const bar = `<div class="progress-bar" style="width:clamp(80px,15vw,140px);display:inline-block;">
       <div class="progress-fill" style="width:${r.avg}%;background:${i===0?'#FCD116':i===1?'#C0C0C0':i===2?'#CD7F32':'var(--accent)'};"></div>
     </div> <span style="font-size:.78rem;">${r.avg.toFixed(1)}%</span>`;
     return `<tr>
@@ -5146,12 +5445,15 @@ async function openChat(uid, name, role) {
     body.innerHTML = msgs.map(m => {
       const isMe = m.fromUid === myId;
       const time = m.createdAt?.toDate?.().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) || '';
-      return `<div style="display:flex;justify-content:${isMe ? 'flex-end' : 'flex-start'};margin-bottom:4px;">
-        <div style="max-width:72%;padding:9px 13px;
-          border-radius:${isMe ? '14px 14px 4px 14px' : '14px 14px 14px 4px'};
-          background:${isMe ? 'var(--gh-green)' : 'var(--card)'};
-          color:${isMe ? '#fff' : 'var(--text)'};
-          font-size:.86rem;line-height:1.5;box-shadow:0 2px 8px rgba(0,0,0,.2);">
+      const align = isMe ? 'flex-end' : 'flex-start';
+      const radius = isMe ? '14px 14px 4px 14px' : '14px 14px 14px 4px';
+      const bg = isMe ? 'var(--gh-green)' : 'var(--card)';
+      const color = isMe ? '#fff' : 'var(--text)';
+      return `<div style="display:flex;justify-content:${align};margin-bottom:4px;">
+        <div class="msg-bubble" style="padding:9px 13px;border-radius:${radius};
+          background:${bg};color:${color};
+          font-size:.86rem;line-height:1.5;box-shadow:0 2px 8px rgba(0,0,0,.2);
+          word-break:break-word;overflow-wrap:anywhere;">
           ${m.text}
           <div style="font-size:.68rem;opacity:.6;margin-top:3px;text-align:right;">${time}${isMe ? ' ✓' : ''}</div>
         </div>
