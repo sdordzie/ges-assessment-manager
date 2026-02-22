@@ -337,6 +337,7 @@ select.form-control { cursor: pointer; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
 .role-chip { padding: 3px 10px; border-radius: 20px; font-size: .72rem; font-weight: 700; }
 .role-admin       { background: rgba(252,209,22,.12); color: var(--gh-gold); border: 1px solid rgba(252,209,22,.25); }
+.role-coadmin     { background: rgba(168,85,247,.12); color: #C084FC;        border: 1px solid rgba(168,85,247,.25); }
 .role-teacher     { background: rgba(0,168,107,.12);  color: var(--accent2); border: 1px solid rgba(0,168,107,.25); }
 .role-headteacher { background: rgba(59,130,246,.12); color: #93C5FD;        border: 1px solid rgba(59,130,246,.25); }
 .avatar {
@@ -513,6 +514,7 @@ tr:hover td { background: rgba(0,168,107,.04); }
 .badge-blue     { background: rgba(59,130,246,.12); color: #93C5FD; border: 1px solid rgba(59,130,246,.2); }
 .badge-red      { background: rgba(239,68,68,.12); color: #FCA5A5; border: 1px solid rgba(239,68,68,.2); }
 .badge-gray     { background: var(--dark3); color: var(--muted); border: 1px solid var(--border); }
+.badge-purple   { background: rgba(168,85,247,.12); color: #C084FC; border: 1px solid rgba(168,85,247,.25); }
 .badge-approved { background: rgba(0,168,107,.12); color: var(--accent2); }
 .badge-pending  { background: rgba(245,158,11,.12); color: #FCD34D; }
 .badge-locked   { background: rgba(239,68,68,.12); color: #FCA5A5; }
@@ -849,6 +851,7 @@ canvas.chart-canvas { width: 100% !important; }
             <select id="regRole" class="form-control">
               <option value="teacher">Class / Subject Teacher</option>
               <option value="headteacher">Head Teacher</option>
+              <option value="coadmin">Co-Admin</option>
               <option value="admin">Admin / ICT Coordinator</option>
             </select>
           </div>
@@ -1611,13 +1614,16 @@ canvas.chart-canvas { width: 100% !important; }
           <div id="pendingList"><div class="empty-state"><div class="empty-icon">✅</div><h3>No pending approvals</h3><p>All registered users have been reviewed.</p></div></div>
         </div>
         <div class="card">
-          <div class="card-title"><span class="ct-icon">👥</span> All Users</div>
+          <div class="card-title"><span class="ct-icon">👥</span> All Users
+            <span id="coAdminCounter" style="margin-left:auto;font-size:.78rem;color:var(--muted);font-weight:500;"></span>
+          </div>
           <div class="search-bar">
             <input type="text" class="form-control" id="userSearch" placeholder="🔍 Search users…" oninput="renderUserTable()"/>
             <select class="form-control" style="max-width:150px;" id="userRoleFilter" onchange="renderUserTable()">
               <option value="">All Roles</option>
               <option value="teacher">Teacher</option>
               <option value="headteacher">Head Teacher</option>
+              <option value="coadmin">Co-Admin</option>
               <option value="admin">Admin</option>
             </select>
           </div>
@@ -1888,19 +1894,28 @@ canvas.chart-canvas { width: 100% !important; }
 
 <!-- CHANGE ROLE MODAL -->
 <div class="modal-overlay" id="roleModal">
-  <div class="modal" style="max-width:360px;">
+  <div class="modal" style="max-width:400px;">
     <button class="modal-close" onclick="closeModal('roleModal')">✕</button>
     <div class="modal-title">🔧 Change User Role</div>
+    <div id="roleModalInfo" style="background:var(--dark2);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:.84rem;color:var(--muted);"></div>
     <input type="hidden" id="roleModalUserId"/>
-    <div class="form-group"><label for="roleModalSelect" class="form-label">New Role</label>
+    <div class="form-group"><label for="roleModalSelect" class="form-label">Assign Role</label>
       <select id="roleModalSelect" class="form-control">
         <option value="teacher">Teacher</option>
         <option value="headteacher">Head Teacher</option>
+        <option value="coadmin">Co-Admin</option>
         <option value="admin">Admin</option>
-      </select></div>
+      </select>
+    </div>
+    <div id="roleModalWarning" style="display:none;padding:10px 14px;border-radius:8px;font-size:.82rem;margin-bottom:10px;background:rgba(168,85,247,.08);color:#C084FC;border:1px solid rgba(168,85,247,.2);">
+      ⚠️ Co-Admins have full management access but <strong>cannot</strong> assign or change other admins' roles, and cannot create new Co-Admins.
+    </div>
+    <div id="roleModalLimit" style="display:none;padding:10px 14px;border-radius:8px;font-size:.82rem;margin-bottom:10px;background:rgba(239,68,68,.08);color:#FCA5A5;border:1px solid rgba(239,68,68,.2);">
+      ⛔ Co-Admin limit reached (5 maximum). Remove an existing Co-Admin first.
+    </div>
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeModal('roleModal')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveUserRole()">Save Role</button>
+      <button class="btn btn-primary" id="roleModalSaveBtn" onclick="saveUserRole()">Save Role</button>
     </div>
   </div>
 </div>
@@ -2154,8 +2169,8 @@ async function startApp() {
     subscribeStudents(),
     subscribeAssessments(),
   ]);
-  if (isAdmin()) {
-    subscribeAllUsers();        // Full user list with pending counts for admin
+  if (isAdminLike()) {
+    subscribeAllUsers();        // Full user list for admin & co-admin
     subscribeSchoolOverview();
   } else if (isHeadTeacher()) {
     subscribeAllUsers();        // Head teachers also need full list for approvals
@@ -2179,8 +2194,10 @@ async function startApp() {
   if (ls('ges_dark')) setDark(true);
 }
 
-function isAdmin() { return USER_DOC?.role === 'admin'; }
-function isHeadTeacher() { return USER_DOC?.role === 'headteacher' || isAdmin(); }
+function isAdmin()     { return USER_DOC?.role === 'admin'; }
+function isCoAdmin()   { return USER_DOC?.role === 'coadmin'; }
+function isAdminLike() { return isAdmin() || isCoAdmin(); }          // Has admin-level access
+function isHeadTeacher() { return USER_DOC?.role === 'headteacher' || isAdminLike(); }
 function myUid() { return CURRENT_USER?.uid; }
 
 // ── TOPBAR / SIDEBAR ──
@@ -2192,8 +2209,8 @@ function updateTopbarUI() {
   eid('sideAvatar').textContent = initials;
   eid('sideUserName').textContent = u.name || 'Teacher';
   eid('sideUserSchool').textContent = u.school || '—';
-  const roleLabel = { teacher:'Teacher', headteacher:'Head Teacher', admin:'Admin' }[u.role] || u.role;
-  const roleClass = { teacher:'role-teacher', headteacher:'role-headteacher', admin:'role-admin' }[u.role] || 'role-teacher';
+  const roleLabel = { teacher:'Teacher', headteacher:'Head Teacher', admin:'Admin', coadmin:'Co-Admin' }[u.role] || u.role;
+  const roleClass = { teacher:'role-teacher', headteacher:'role-headteacher', admin:'role-admin', coadmin:'role-coadmin' }[u.role] || 'role-teacher';
   const chip = eid('roleChip');
   chip.textContent = roleLabel;
   chip.className = `role-chip no-print ${roleClass}`;
@@ -2234,7 +2251,7 @@ function buildSidebar() {
       { page:'approvals', icon:'✅', label:'Approvals' },
     ]});
   }
-  if (isAdmin()) {
+  if (isAdminLike()) {
     items[items.length-1].items.push(
       { page:'users', icon:'👥', label:'Users', badge:'pendingCount' }
     );
@@ -3219,6 +3236,14 @@ function subscribeApprovedUsers() {
 function updatePendingCount() {
   const count = ALL_USERS.filter(u => u.status === 'pending').length;
   ['pendingCount'].forEach(id => { const el = eid(id); if(el) el.textContent = count; });
+  // Co-admin slot counter
+  const MAX_COADMINS = 5;
+  const coAdminCount = ALL_USERS.filter(u => u.role === 'coadmin').length;
+  const counter = eid('coAdminCounter');
+  if (counter) {
+    counter.textContent = `Co-Admins: ${coAdminCount} / ${MAX_COADMINS}`;
+    counter.style.color = coAdminCount >= MAX_COADMINS ? 'var(--danger)' : 'var(--muted)';
+  }
   renderPendingList();
 }
 
@@ -3257,23 +3282,40 @@ function renderUserTable() {
     tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">👥</div><h3>No users found</h3></div></td></tr>`;
     return;
   }
+
+  // Co-admin limit info
+  const coAdminCount = ALL_USERS.filter(u => u.role === 'coadmin').length;
+  const MAX_COADMINS = 5;
+
   tbody.innerHTML = filtered.map(u => {
     const statusClass = { approved:'badge-green', pending:'badge-gold', suspended:'badge-red' }[u.status] || 'badge-gray';
-    const roleLabel = { teacher:'Teacher', headteacher:'Head Teacher', admin:'Admin' }[u.role] || u.role;
-    return `<tr>
-      <td><strong>${u.name}</strong><br><span style="font-size:.75rem;color:var(--muted);">${u.email}</span></td>
-      <td>${u.school||'—'}</td>
-      <td><span class="badge ${u.role==='admin'?'badge-gold':u.role==='headteacher'?'badge-blue':'badge-green'}">${roleLabel}</span></td>
-      <td>${u.district||'—'}</td>
-      <td><span class="badge ${statusClass}">${u.status||'—'}</span></td>
-      <td style="font-size:.78rem;color:var(--muted);">${u.createdAt?.toDate?.().toLocaleDateString()||'—'}</td>
-      <td>
-        ${u.status==='pending'?`<button class="btn btn-sm btn-primary" onclick="approveUser('${u.id}')">Approve</button>`:''}
-        ${u.status==='approved'?`<button class="btn btn-sm btn-danger" onclick="suspendUser('${u.id}','${u.name}')">Suspend</button>`:''}
-        ${u.status==='suspended'?`<button class="btn btn-sm btn-outline" onclick="approveUser('${u.id}')">Reinstate</button>`:''}
-        <button class="btn btn-sm btn-outline" onclick="openRoleModal('${u.id}','${u.role}')">Role</button>
-      </td>
-    </tr>`;
+    const roleLabel = { teacher:'Teacher', headteacher:'Head Teacher', admin:'Admin', coadmin:'Co-Admin' }[u.role] || u.role;
+    const badgeClass = u.role==='admin'?'badge-gold': u.role==='coadmin'?'badge-purple': u.role==='headteacher'?'badge-blue':'badge-green';
+    const isThisAdmin = u.role === 'admin';
+    const isThisCoAdmin = u.role === 'coadmin';
+    const amAdmin = isAdmin();
+    const amCoAdmin = isCoAdmin();
+
+    // Co-admin cannot touch admin accounts at all; can manage everyone else
+    const canManage = amAdmin || (amCoAdmin && !isThisAdmin && !isThisCoAdmin);
+    const canChangeRole = amAdmin; // Only full admin can assign/change roles
+
+    const safeName = (u.name||'').replace(/'/g, "&#39;");
+    let actions = '';
+    if (canManage && u.status==='pending')   actions += '<button class="btn btn-sm btn-primary" onclick="approveUser(\'' + u.id + '\')">Approve</button> ';
+    if (canManage && u.status==='approved')  actions += '<button class="btn btn-sm btn-danger" onclick="suspendUser(\'' + u.id + '\',\'' + safeName + '\')">Suspend</button> ';
+    if (canManage && u.status==='suspended') actions += '<button class="btn btn-sm btn-outline" onclick="approveUser(\'' + u.id + '\')">Reinstate</button> ';
+    if (canChangeRole) actions += '<button class="btn btn-sm btn-outline" onclick="openRoleModal(\'' + u.id + '\',\'' + u.role + '\',\'' + safeName + '\')">Role</button>';
+    if (!actions) actions = '<span style="font-size:.75rem;color:var(--muted);">—</span>';
+    return '<tr>'
+      + '<td><strong>' + (u.name||'') + '</strong><br><span style="font-size:.75rem;color:var(--muted);">' + (u.email||'') + '</span></td>'
+      + '<td>' + (u.school||'—') + '</td>'
+      + '<td><span class="role-chip role-' + (u.role||'teacher') + '" style="font-size:.72rem;">' + roleLabel + '</span></td>'
+      + '<td>' + (u.district||'—') + '</td>'
+      + '<td><span class="badge ' + statusClass + '">' + (u.status||'—') + '</span></td>'
+      + '<td style="font-size:.78rem;color:var(--muted);">' + (u.createdAt?.toDate?.().toLocaleDateString()||'—') + '</td>'
+      + '<td style="white-space:nowrap;">' + actions + '</td>'
+      + '</tr>';
   }).join('');
 }
 
@@ -3299,16 +3341,48 @@ async function suspendUser(uid, name) {
   });
 }
 
-function openRoleModal(uid, currentRole) {
+function openRoleModal(uid, currentRole, userName) {
+  const MAX_COADMINS = 5;
+  const coAdminCount = ALL_USERS.filter(u => u.role === 'coadmin').length;
+
   eid('roleModalUserId').value = uid;
   eid('roleModalSelect').value = currentRole;
+
+  // Info line
+  eid('roleModalInfo').innerHTML = `Changing role for: <strong>${userName || uid}</strong><br>Current role: <strong>${{ teacher:'Teacher', headteacher:'Head Teacher', admin:'Admin', coadmin:'Co-Admin' }[currentRole] || currentRole}</strong>`;
+
+  // Show/hide warnings on select change
+  const sel = eid('roleModalSelect');
+  const updateWarnings = () => {
+    const newRole = sel.value;
+    const atLimit = coAdminCount >= MAX_COADMINS && currentRole !== 'coadmin' && newRole === 'coadmin';
+    eid('roleModalWarning').style.display = newRole === 'coadmin' ? 'block' : 'none';
+    eid('roleModalLimit').style.display   = atLimit ? 'block' : 'none';
+    eid('roleModalSaveBtn').disabled      = atLimit;
+  };
+  sel.onchange = updateWarnings;
+  updateWarnings();
+
   openModal('roleModal');
 }
 
 async function saveUserRole() {
+  const MAX_COADMINS = 5;
   const { db, doc, updateDoc } = window.FB;
-  const uid = eid('roleModalUserId').value;
-  const role = eid('roleModalSelect').value;
+  const uid    = eid('roleModalUserId').value;
+  const role   = eid('roleModalSelect').value;
+
+  // Double-check co-admin limit server-side
+  if (role === 'coadmin') {
+    const currentUser = ALL_USERS.find(u => u.id === uid);
+    const coAdminCount = ALL_USERS.filter(u => u.role === 'coadmin').length;
+    const alreadyCoAdmin = currentUser?.role === 'coadmin';
+    if (!alreadyCoAdmin && coAdminCount >= MAX_COADMINS) {
+      toast(`Co-Admin limit reached (max ${MAX_COADMINS}). Remove one first.`, 'error');
+      return;
+    }
+  }
+
   await updateDoc(doc(db, 'users', uid), { role });
   closeModal('roleModal');
   toast('Role updated!', 'success');
@@ -3610,13 +3684,13 @@ async function renderDashboard() {
     { label:'✏️ Enter Scores', page:'scores' },
     { label:'📄 Generate PDF', page:'reports', gold:true },
   ];
-  if (isAdmin() || isHeadTeacher()) quickActions.push({ label:'👥 Manage Users', page:'users' });
+  if (isAdminLike() || isHeadTeacher()) quickActions.push({ label:'👥 Manage Users', page:'users' });
   eid('dashQuickActions').innerHTML = quickActions.map(a =>
     `<button class="btn btn-sm ${a.gold?'btn-gold':'btn-outline'}" onclick="showPage('${a.page}')">${a.label}</button>`
   ).join('');
 
   // Admin panel
-  if (isAdmin() || isHeadTeacher()) {
+  if (isAdminLike() || isHeadTeacher()) {
     eid('adminDashPanel').style.display = 'block';
     const pending = ALL_USERS.filter(u => u.status === 'pending').length;
     eid('schoolOverview').innerHTML = `
@@ -5002,7 +5076,7 @@ function renderMsgContacts() {
     const name = u.name || 'Unknown';
     const role = u.role || 'teacher';
     const initials = name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
-    const roleClass = { teacher:'role-teacher', headteacher:'role-headteacher', admin:'role-admin' }[role] || 'role-teacher';
+    const roleClass = { teacher:'role-teacher', headteacher:'role-headteacher', admin:'role-admin', coadmin:'role-coadmin' }[role] || 'role-teacher';
     const isActive = ACTIVE_CHAT_UID === uid;
     const bg = isActive ? 'var(--dark3)' : 'transparent';
     const safeName = name.replace(/'/g, '&#39;');
@@ -5228,7 +5302,7 @@ function renderNoticeBoard() {
   const myRole = USER_DOC?.role || 'teacher';
 
   const visible = NOTICES.filter(n => {
-    if (n.audience === 'admin' && !['admin','headteacher'].includes(myRole)) return false;
+    if (n.audience === 'admin' && !['admin','coadmin','headteacher'].includes(myRole)) return false;
     if (filter !== 'all' && n.category !== filter) return false;
     return true;
   });
@@ -5244,7 +5318,7 @@ function renderNoticeBoard() {
 
   el.innerHTML = visible.map(n => {
     const time = n.createdAt?.toDate?.().toLocaleDateString('en-GH',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) || '';
-    const canDelete = n.authorUid === myUid() || isAdmin();
+    const canDelete = n.authorUid === myUid() || isAdminLike();
     return `<div style="border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;
       border-left:4px solid ${catColor[n.category]||'var(--accent2)'};
       background:var(--dark2);position:relative;">
@@ -5263,7 +5337,7 @@ function renderNoticeBoard() {
         <span class="badge ${n.category==='urgent'?'badge-red':n.category==='meeting'?'badge-blue':'badge-green'}">${catIcon[n.category]||''} ${n.category}</span>
         <span class="badge badge-gray">${n.audience==='all'?'All Staff':n.audience==='admin'?'Admin Only':'Teachers'}</span>
         ${canDelete ? `<button class="btn-icon" style="margin-left:auto;font-size:.8rem;" onclick="deleteNotice('${n.id}')">🗑️ Delete</button>` : ''}
-        ${isAdmin() ? `<button class="btn-icon" style="font-size:.8rem;" onclick="togglePin('${n.id}',${n.pinned})">${n.pinned?'📌 Unpin':'📌 Pin'}</button>` : ''}
+        ${isAdminLike() ? `<button class="btn-icon" style="font-size:.8rem;" onclick="togglePin('${n.id}',${n.pinned})">${n.pinned?'📌 Unpin':'📌 Pin'}</button>` : ''}
       </div>
     </div>`;
   }).join('');
