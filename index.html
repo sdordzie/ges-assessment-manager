@@ -3799,20 +3799,40 @@ function renderNotifications() {
     el.innerHTML = '<div class="empty-state"><div class="empty-icon">🔔</div><h3>No notifications yet</h3><p>You\'ll be notified when assessments are approved or rejected.</p></div>';
     return;
   }
-  el.innerHTML = NOTIFICATIONS.map(n => `
-    <div style="display:flex;gap:12px;padding:12px;border-bottom:1px solid var(--border);
-      background:${n.read ? 'transparent' : 'rgba(0,168,107,0.05)'};
-      border-left:${n.read ? 'none' : '3px solid var(--accent)'};">
+  el.innerHTML = NOTIFICATIONS.map(n => {
+    const isMsg = n.icon === '💬' && n.fromUid;
+    const bg = n.read ? 'transparent' : 'rgba(0,168,107,0.06)';
+    const border = n.read ? '3px solid transparent' : '3px solid var(--accent)';
+    const safeName = (n.fromName || '').replace(/'/g, "&#39;");
+    const clickAttr = isMsg
+      ? `onclick="openMsgFromNotif('${n.id}','${n.fromUid}','${safeName}')" style="cursor:pointer;" title="Open conversation"`
+      : '';
+    const hint = isMsg && !n.read
+      ? `<span style="font-size:.72rem;color:var(--accent2);margin-top:4px;display:block;">Tap to open conversation →</span>`
+      : '';
+    return `
+    <div ${clickAttr} style="display:flex;gap:12px;padding:13px;border-bottom:1px solid var(--border);
+      background:${bg};border-left:${border};transition:background .18s;">
       <div style="font-size:1.4rem;flex-shrink:0;">${n.icon || '🔔'}</div>
-      <div style="flex:1;">
+      <div style="flex:1;min-width:0;">
         <div style="font-weight:${n.read ? '500' : '700'};font-size:.9rem;">${n.title || 'Notification'}</div>
-        <div style="font-size:.82rem;color:var(--muted);margin-top:2px;">${n.body || ''}</div>
-        <div style="font-size:.75rem;color:var(--muted);margin-top:4px;">
-          ${n.createdAt?.toDate?.().toLocaleString() || ''}
-        </div>
+        <div style="font-size:.82rem;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${n.body || ''}</div>
+        <div style="font-size:.74rem;color:var(--muted);margin-top:4px;">${n.createdAt?.toDate?.().toLocaleString() || ''}</div>
+        ${hint}
       </div>
-      ${!n.read ? `<button class="btn-icon" onclick="markRead('${n.id}')" title="Mark read">✓</button>` : ''}
-    </div>`).join('');
+      ${!n.read ? `<button class="btn-icon" onclick="event.stopPropagation();markRead('${n.id}')" title="Mark read" style="flex-shrink:0;">✓</button>` : ''}
+    </div>`;
+  }).join('');
+}
+
+async function openMsgFromNotif(notifId, fromUid, fromName) {
+  markRead(notifId);
+  const sender = ALL_USERS.find(u => (u.uid || u.id) === fromUid);
+  const senderName = fromName || sender?.name || 'Staff';
+  const senderRole = sender?.role || 'teacher';
+  showPage('messaging');
+  // Give the contacts list time to render, then open the chat
+  setTimeout(() => openChat(fromUid, senderName, senderRole), 200);
 }
 
 async function markRead(id) {
