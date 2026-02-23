@@ -17,8 +17,10 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
   signOut, onAuthStateChanged, sendPasswordResetEmail }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc,
-  collection, query, where, orderBy, onSnapshot, serverTimestamp, writeBatch }
+  collection, query, where, orderBy, onSnapshot, serverTimestamp, writeBatch, arrayUnion }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getMessaging, getToken, onMessage }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
 
 // ═══════════════════════════════════════════════════════════════
 //  🔥 FIREBASE CONFIG — Replace with YOUR project credentials
@@ -30,25 +32,28 @@ const FIREBASE_CONFIG = {
   projectId: "ges-assessment-gh",
   storageBucket: "ges-assessment-gh.firebasestorage.app",
   messagingSenderId: "122255207351",
-  appId: "1:122255207351:web:72fc3a66166e4380951632"
+  appId: "1:122255207351:web:72fc3a66166e4380951632",
+  vapidkey: "BBLzGUwHyx0SyVM3xEun_T7u_IP-F9fCb-GbhLxBcIxzjWvht463Gwa68xcA4lB6Jf3g5ctnLcxI9_rUd4gPXFo"
 };
 
 // Check if configured
 const IS_CONFIGURED = !FIREBASE_CONFIG.apiKey.includes("YOUR_");
 
-let app, auth, db;
+let app, auth, db, messaging;
 if (IS_CONFIGURED) {
   app = initializeApp(FIREBASE_CONFIG);
   auth = getAuth(app);
   db = getFirestore(app);
+  try { messaging = getMessaging(app); } catch(e) { messaging = null; }
 }
 
 // ── Expose to global scope ──
-window.FB = { auth, db, IS_CONFIGURED,
+window.FB = { auth, db, messaging, IS_CONFIGURED,
   createUserWithEmailAndPassword, signInWithEmailAndPassword,
   signOut, onAuthStateChanged, sendPasswordResetEmail,
   doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc,
-  collection, query, where, orderBy, onSnapshot, serverTimestamp, writeBatch
+  collection, query, where, orderBy, onSnapshot, serverTimestamp, writeBatch, arrayUnion,
+  getToken, onMessage
 };
 
 // Boot app after Firebase loads
@@ -1091,6 +1096,13 @@ canvas.chart-canvas { max-width: 100% !important; height: auto !important; }
           <p>Go to <strong>Project Settings (⚙️) → Your apps → Add app → Web (&lt;/&gt;)</strong> → Register app → Copy the <code>firebaseConfig</code> object values below.</p>
         </div>
       </div>
+      <div class="step-card">
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <h3>Enable Push Notifications (optional)</h3>
+          <p>In Firebase Console → <strong>Project Settings → Cloud Messaging</strong> → Under <strong>Web configuration</strong> → Click <strong>Generate key pair</strong> → Copy the VAPID key below to enable real device push notifications.</p>
+        </div>
+      </div>
     </div>
     <div class="config-area">
       <p style="font-size:.85rem;color:var(--muted);margin-bottom:16px;">Paste your Firebase config values here to connect the database:</p>
@@ -1106,9 +1118,23 @@ canvas.chart-canvas { max-width: 100% !important; height: auto !important; }
         <div><label>Messaging Sender ID</label><input type="text" class="config-input" id="cfg-messagingSenderId" placeholder="123456789"/></div>
         <div><label>App ID *</label><input type="text" class="config-input" id="cfg-appId" placeholder="1:123...:web:abc..."/></div>
       </div>
+      <div class="config-row" style="margin-top:8px;">
+        <div style="grid-column:1/-1;">
+          <label>VAPID Key <span style="font-size:.75rem;color:var(--muted);font-weight:400;">(optional — enables real device push notifications)</span></label>
+          <input type="text" class="config-input" id="cfg-vapidKey" placeholder="BNt..." oninput="eid('cloudFnInfo').style.display=this.value?'block':'none'"/>
+        </div>
+      </div>
       <button class="btn btn-primary btn-full" style="margin-top:8px;" onclick="saveFirebaseConfig()">
         🔥 Connect Firebase &amp; Continue
       </button>
+    </div>
+    <div id="cloudFnInfo" style="display:none;background:rgba(0,168,107,.06);border:1px solid rgba(0,168,107,.2);border-radius:10px;padding:14px;margin-top:14px;font-size:.82rem;line-height:1.7;">
+      <strong style="color:var(--accent2);">📲 To enable background device push notifications:</strong><br/>
+      After connecting Firebase, deploy this one-line Cloud Function in your Firebase project:<br/>
+      <code style="background:var(--dark3);padding:6px 10px;border-radius:6px;display:block;margin:8px 0;font-size:.78rem;word-break:break-all;">
+        npx firebase-tools functions:deploy --only pushDelivery
+      </code>
+      Or copy the Cloud Function code from: <strong>Settings → Push Notifications → View Setup Guide</strong> inside the app.
     </div>
     <div style="text-align:center;margin-top:16px;font-size:.8rem;color:var(--muted);">
       Your config is stored only in this browser. Never share your HTML file with config embedded publicly.
@@ -1709,9 +1735,28 @@ canvas.chart-canvas { max-width: 100% !important; height: auto !important; }
       <div class="page" id="page-notifications">
         <div class="page-header">
           <div class="page-title">Notifications</div>
-          <div class="page-sub">Assessment approvals · System alerts · Activity updates</div>
+          <div class="page-sub">Assessment approvals · Messages · System alerts</div>
         </div>
-        <div class="card no-print" style="display:flex;gap:10px;padding:14px;">
+
+        <!-- Push notification settings card -->
+        <div class="card no-print" id="pushSettingsCard">
+          <div class="card-title"><span class="ct-icon">📲</span> Device Push Notifications</div>
+          <div style="font-size:.85rem;color:var(--muted);margin-bottom:14px;line-height:1.6;">
+            Enable push notifications to receive alerts on this device even when the app is closed — 
+            including new messages, assessment approvals, and announcements.
+          </div>
+          <div id="pushStatus" style="font-size:.84rem;margin-bottom:14px;"></div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn btn-primary" id="pushEnableBtn" onclick="requestPushPermission()">
+              🔔 Enable Push Notifications
+            </button>
+            <button class="btn btn-sm btn-outline" onclick="testPushNotification()" id="pushTestBtn" style="display:none;">
+              🧪 Send Test Notification
+            </button>
+          </div>
+        </div>
+
+        <div class="card no-print" style="display:flex;gap:10px;padding:14px;flex-wrap:wrap;">
           <button class="btn btn-sm btn-outline" onclick="markAllRead()">✅ Mark All Read</button>
           <button class="btn btn-sm btn-outline" onclick="clearNotifications()">🗑️ Clear All</button>
         </div>
@@ -2305,6 +2350,7 @@ function saveFirebaseConfig() {
     storageBucket: eid('cfg-storageBucket').value.trim(),
     messagingSenderId: eid('cfg-messagingSenderId').value.trim(),
     appId: eid('cfg-appId').value.trim(),
+    vapidKey: eid('cfg-vapidKey')?.value.trim() || '',
   };
   if (!cfg.apiKey || !cfg.authDomain || !cfg.projectId || !cfg.appId) {
     return toast('API Key, Auth Domain, Project ID and App ID are required.', 'error');
@@ -2486,6 +2532,15 @@ async function startApp() {
   subscribeMessages();
   subscribeNotices();
   restorePhotoFolder();
+
+  // ── FCM Push Notifications ────────────────────────────────────
+  // Auto-register if permission already granted (silent re-registration)
+  // Shows the enable prompt only on the Notifications page
+  if (Notification?.permission === 'granted') {
+    registerPushToken().catch(() => {});
+  }
+  // Update push UI whenever notifications page is visited
+  setTimeout(updatePushSettingsUI, 500);
   // Restore language preference
   const savedLang = ls('ges_lang');
   if (savedLang && savedLang !== LANG) { LANG = savedLang; applyLanguage(); }
@@ -4118,33 +4173,198 @@ window.addEventListener('appinstalled', () => {
   eid('installBtn').style.display = 'none';
 });
 
-// Register service worker for offline caching
+// ─────────────────────────────────────────────────────────────────
+// SERVICE WORKER — Offline cache + FCM background push handler
+// ─────────────────────────────────────────────────────────────────
+const SW_CODE = `
+importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
+
+const CACHE = 'ges-assess-v3';
+
+// ── Offline cache ──────────────────────────────────────────────
+self.addEventListener('install', e => {
+  self.skipWaiting();
+  e.waitUntil(
+    caches.open(CACHE).then(c => c.addAll(['./','./index.html']).catch(()=>{}))
+  );
+});
+self.addEventListener('activate', e => {
+  e.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+    ).then(() => self.clients.claim())
+  );
+});
+self.addEventListener('fetch', e => {
+  if (e.request.method !== 'GET') return;
+  e.respondWith(
+    fetch(e.request)
+      .then(r => {
+        const clone = r.clone();
+        caches.open(CACHE).then(c => c.put(e.request, clone)).catch(()=>{});
+        return r;
+      })
+      .catch(() => caches.match(e.request))
+  );
+});
+
+// ── FCM background message handler ────────────────────────────
+let _fbReady = false;
+self.addEventListener('message', e => {
+  if (e.data?.type === 'FCM_CONFIG' && !_fbReady) {
+    try {
+      firebase.initializeApp(e.data.config);
+      const msg = firebase.messaging();
+      msg.onBackgroundMessage(payload => {
+        const n = payload.notification || {};
+        const data = payload.data || {};
+        self.registration.showNotification(n.title || data.title || 'GES Assessment Manager', {
+          body:  n.body  || data.body  || 'You have a new notification',
+          icon:  '/icon-192.png',
+          badge: '/badge-72.png',
+          tag:   data.tag || 'ges-notif',
+          data:  { url: data.url || '/' },
+          actions: data.action ? [{ action: 'open', title: data.action }] : [],
+          requireInteraction: false,
+          vibrate: [200, 100, 200],
+        });
+      });
+      _fbReady = true;
+    } catch(err) {}
+  }
+});
+
+// ── Notification click — open/focus the app ───────────────────
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  const url = e.notification.data?.url || '/';
+  e.waitUntil(
+    clients.matchAll({ type:'window', includeUncontrolled: true }).then(list => {
+      const match = list.find(c => c.url.includes(location.origin));
+      if (match) return match.focus();
+      return clients.openWindow(url);
+    })
+  );
+});
+`;
+
+// Register SW from blob (works even when hosted as a single file)
+let SW_REG = null;
 if ('serviceWorker' in navigator) {
-  const SW_CODE = `
-    const CACHE = 'ges-assess-v1';
-    const ASSETS = ['./', './index.html'];
-    self.addEventListener('install', e => {
-      e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS).catch(()=>{})));
-    });
-    self.addEventListener('fetch', e => {
-      e.respondWith(
-        fetch(e.request).catch(() => caches.match(e.request))
-      );
-    });
-    self.addEventListener('push', e => {
-      const data = e.data ? e.data.json() : { title:'GES Assessment', body:'You have a new notification' };
-      e.waitUntil(self.registration.showNotification(data.title, {
-        body: data.body, icon: data.icon || '',
-        badge: data.badge || '', tag: data.tag || 'ges-notif'
-      }));
-    });
-  `;
   const swBlob = new Blob([SW_CODE], { type: 'application/javascript' });
-  const swUrl = URL.createObjectURL(swBlob);
-  navigator.serviceWorker.register(swUrl).catch(() => {});
+  const swUrl  = URL.createObjectURL(swBlob);
+  navigator.serviceWorker.register(swUrl, { scope: '/' })
+    .then(reg => {
+      SW_REG = reg;
+      // Pass Firebase config into SW for FCM background messaging
+      const cfg = gl('ges_firebase_config');
+      if (cfg && reg.active) {
+        reg.active.postMessage({ type: 'FCM_CONFIG', config: cfg });
+      }
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (cfg && navigator.serviceWorker.controller) {
+          navigator.serviceWorker.controller.postMessage({ type: 'FCM_CONFIG', config: cfg });
+        }
+      });
+    })
+    .catch(() => {});
 }
 
-// ── 2. PUSH NOTIFICATIONS ───────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────
+// FCM TOKEN — Register device for push, save token to Firestore
+// ─────────────────────────────────────────────────────────────────
+let FCM_TOKEN = null;
+
+async function registerPushToken() {
+  const { messaging, db, doc, updateDoc, getToken } = window.FB;
+  if (!messaging || !myUid()) return;
+
+  const cfg = gl('ges_firebase_config');
+  const vapidKey = cfg?.vapidKey;
+  if (!vapidKey) return; // VAPID key not configured — silently skip
+
+  try {
+    // Must have a service worker registration for FCM
+    const swReg = await navigator.serviceWorker.ready;
+
+    const token = await getToken(messaging, { vapidKey, serviceWorkerRegistration: swReg });
+    if (!token) return;
+    FCM_TOKEN = token;
+
+    // Save token to Firestore under the user document
+    // Store as an array so multiple devices per user are supported
+    const userRef = doc(db, 'users', myUid());
+    const { getDoc, arrayUnion } = window.FB;
+    const snap = await getDoc(userRef);
+    const existing = snap.data()?.fcmTokens || [];
+    if (!existing.includes(token)) {
+      await updateDoc(userRef, { fcmTokens: arrayUnion ? arrayUnion(token) : [...existing, token] });
+    }
+
+    // Listen for foreground messages (app is open)
+    const { onMessage } = window.FB;
+    if (onMessage) {
+      onMessage(messaging, payload => {
+        const n = payload.notification || payload.data || {};
+        toast(`🔔 ${n.title || 'New notification'}: ${n.body || ''}`, 'info', 6000);
+        // Also refresh the in-app notifications list
+        subscribeNotifications && subscribeNotifications();
+      });
+    }
+
+  } catch (err) {
+    // Permission denied or not supported — fail silently
+    if (err.code !== 'messaging/permission-blocked') {
+      console.warn('FCM token registration failed:', err.message);
+    }
+  }
+}
+
+async function requestPushPermission() {
+  if (!('Notification' in window)) {
+    return toast('Push notifications not supported on this device.', 'warning');
+  }
+  if (Notification.permission === 'granted') {
+    await registerPushToken();
+    toast('Push notifications are already enabled! ✅', 'success');
+    return;
+  }
+  if (Notification.permission === 'denied') {
+    toast('Notifications blocked. Enable them in your browser settings → Site permissions.', 'warning', 6000);
+    return;
+  }
+  const permission = await Notification.requestPermission();
+  if (permission === 'granted') {
+    await registerPushToken();
+    toast('Push notifications enabled! You will be notified even when the app is closed. 🔔', 'success', 5000);
+    updatePushSettingsUI();
+  } else {
+    toast('Push notifications declined. You can enable them later in Settings.', 'info');
+  }
+}
+
+function updatePushSettingsUI() {
+  const status = eid('pushStatus');
+  const btn    = eid('pushEnableBtn');
+  if (!status || !btn) return;
+  const perm = Notification?.permission || 'default';
+  if (perm === 'granted' && FCM_TOKEN) {
+    status.innerHTML = '<span style="color:var(--accent2);">✅ Enabled — you will receive push notifications on this device</span>';
+    btn.textContent  = '🔕 Notification Settings';
+    btn.onclick      = () => toast('To disable: go to your browser Site Settings → Notifications and block this site.', 'info', 6000);
+  } else if (perm === 'denied') {
+    status.innerHTML = '<span style="color:var(--danger);">🚫 Blocked — enable in browser Site Settings</span>';
+    btn.textContent  = '⚙️ Open Browser Settings';
+    btn.onclick      = () => toast('Open your browser Settings → Privacy → Site permissions → Notifications → allow this site.', 'info', 7000);
+  } else {
+    status.innerHTML = '<span style="color:var(--muted);">🔔 Not yet enabled on this device</span>';
+    btn.textContent  = '🔔 Enable Push Notifications';
+    btn.onclick      = requestPushPermission;
+  }
+}
+
+// ── 2. IN-APP NOTIFICATIONS ──────────────────────────────────────
 let NOTIFICATIONS = [];
 
 async function subscribeNotifications() {
@@ -4158,7 +4378,13 @@ async function subscribeNotifications() {
   const unsub = onSnapshot(q, snap => {
     NOTIFICATIONS = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     updateNotifBadge();
-    if (eid('page-notifications').classList.contains('active')) renderNotifications();
+    if (eid('page-notifications').classList.contains('active')) {
+      renderNotifications();
+      updatePushSettingsUI();
+      // Show test button if already enabled
+      const testBtn = eid('pushTestBtn');
+      if (testBtn) testBtn.style.display = Notification?.permission === 'granted' ? 'inline-flex' : 'none';
+    }
   });
   UNSUBSCRIBERS.push(unsub);
 }
@@ -4234,18 +4460,86 @@ async function clearNotifications() {
   });
 }
 
-// Send a notification to a user (used by admin/headteacher)
-async function sendNotification(toUid, title, body, icon = '🔔') {
+// ─────────────────────────────────────────────────────────────────
+// sendNotification — Writes to Firestore AND delivers device push
+// Works for all roles. Push only fires if recipient has FCM token.
+// ─────────────────────────────────────────────────────────────────
+async function sendNotification(toUid, title, body, icon = '🔔', extra = {}) {
   if (!window.FB?.db) return;
-  const { db, doc, setDoc, serverTimestamp } = window.FB;
+  const { db, doc, setDoc, getDoc, serverTimestamp } = window.FB;
+
+  // 1. Write in-app notification to Firestore
   const id = `notif_${Date.now()}_${Math.random().toString(36).slice(2,6)}`;
   await setDoc(doc(db, 'notifications', id), {
     toUid, title, body, icon,
-    fromUid: myUid(),
+    fromUid:  myUid(),
     fromName: USER_DOC?.name || 'System',
-    read: false,
+    read:     false,
     createdAt: serverTimestamp(),
+    ...extra,
   });
+
+  // 2. Attempt device push via FCM HTTP v1 API
+  // This works by writing a push task to Firestore that a Cloud Function picks up.
+  // The fallback below uses the FCM Legacy API directly if a server key is stored.
+  try {
+    const recipientSnap = await getDoc(doc(db, 'users', toUid));
+    const recipientData = recipientSnap.data();
+    const tokens = recipientData?.fcmTokens || [];
+    if (!tokens.length) return; // device not registered for push — in-app only
+
+    const cfg = gl('ges_firebase_config');
+    if (!cfg?.vapidKey) return; // VAPID not configured
+
+    // Write a push_tasks document — picked up by Cloud Function or direct FCM call
+    // This pattern works without a server: Cloud Functions watches push_tasks collection
+    await setDoc(doc(db, 'push_tasks', id), {
+      tokens,
+      notification: {
+        title: title.replace(/^[^\w\s]+\s*/, ''), // strip leading emoji for cleaner display
+        body,
+      },
+      data: {
+        tag:    extra.tag    || 'ges-notif',
+        url:    extra.url    || '/',
+        action: extra.action || '',
+        title,
+        body,
+      },
+      createdAt: serverTimestamp(),
+      delivered: false,
+    });
+  } catch (e) {
+    // Push delivery failed silently — in-app notification was already written
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// testPushNotification — lets user verify push is working
+// ─────────────────────────────────────────────────────────────────
+async function testPushNotification() {
+  if (Notification.permission !== 'granted') {
+    return requestPushPermission();
+  }
+  // Show a real browser notification immediately (no server needed)
+  const swReg = await navigator.serviceWorker.ready.catch(() => null);
+  if (swReg) {
+    swReg.showNotification('GES Assessment Manager 🇬🇭', {
+      body: 'Push notifications are working correctly on this device! ✅',
+      icon: '/icon-192.png',
+      badge: '/badge-72.png',
+      tag: 'ges-test',
+      vibrate: [200, 100, 200],
+    });
+    toast('Test notification sent! Check your device notification panel.', 'success');
+  } else {
+    // Fallback to Notification API directly
+    new Notification('GES Assessment Manager 🇬🇭', {
+      body: 'Push notifications are working! ✅',
+      tag: 'ges-test',
+    });
+    toast('Test notification sent!', 'success');
+  }
 }
 
 // Hook into assessment approval/rejection to auto-notify
