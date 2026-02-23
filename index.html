@@ -433,7 +433,7 @@ select.form-control { cursor: pointer; }
   min-height: 0;
   padding: clamp(14px, 4vw, 28px);
   /* Always leave room below last element — extra on mobile for bottom nav */
-  padding-bottom: calc(var(--bottom-nav-h) + 100px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 32px);
 }
 /* Mobile bottom padding handled in .content rule above */
 .page { display: none; }
@@ -697,6 +697,10 @@ canvas.chart-canvas { width: 100% !important; }
   padding: 0 4px;
   padding-bottom: env(safe-area-inset-bottom);
   box-shadow: 0 -4px 20px rgba(0,0,0,.3);
+  transition: transform .25s ease;
+}
+#mobileBottomNav.hidden {
+  transform: translateY(100%);
 }
 @media(max-width:768px) { #mobileBottomNav { display: flex; } }
 .mob-nav-item {
@@ -985,7 +989,7 @@ canvas.chart-canvas { width: 100% !important; }
 }
 /* Enough room so content doesn't hide behind bottom nav */
 @media(max-width:768px) {
-  .content { padding-bottom: calc(var(--bottom-nav-h) + 120px + env(safe-area-inset-bottom, 0px)) !important; }
+  .content { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 40px) !important; }
   .toast-wrap { bottom: calc(var(--bnav-h) + 8px + env(safe-area-inset-bottom, 0px)); }
 }
 
@@ -5973,6 +5977,55 @@ document.addEventListener('DOMContentLoaded', () => {
   if (yearEl && !yearEl.value) yearEl.value = new Date().getFullYear();
   updateIndexPreview();
 });
+
+
+// ── BOTTOM NAV: hide on scroll down, show on scroll up ──────────
+(function() {
+  var lastY = 0;
+  var nav = null;
+  var ticking = false;
+
+  function initScrollHide() {
+    nav = document.getElementById('mobileBottomNav');
+    var scroller = document.querySelector('.content');
+    if (!scroller || !nav) return;
+
+    scroller.addEventListener('scroll', function() {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(function() {
+        var y = scroller.scrollTop;
+        var diff = y - lastY;
+        // Only trigger after meaningful scroll (>6px) to avoid jitter
+        if (Math.abs(diff) > 6) {
+          if (diff > 0 && y > 80) {
+            // Scrolling DOWN — hide nav
+            nav.classList.add('hidden');
+          } else {
+            // Scrolling UP or near top — show nav
+            nav.classList.remove('hidden');
+          }
+          lastY = y;
+        }
+        ticking = false;
+      });
+    }, { passive: true });
+  }
+
+  // Run once app is visible
+  document.addEventListener('DOMContentLoaded', function() {
+    // Wait for app to render
+    var observer = new MutationObserver(function(mutations, obs) {
+      if (document.getElementById('mobileBottomNav')) {
+        initScrollHide();
+        obs.disconnect();
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+    // Also try immediately in case DOM is ready
+    initScrollHide();
+  });
+})();
 
 </script>
 <!-- ═════ MOBILE BOTTOM NAV ═════ -->
