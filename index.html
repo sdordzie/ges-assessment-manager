@@ -100,6 +100,7 @@ window.addEventListener('DOMContentLoaded', () => { window.initApp && window.ini
 
   /* Mobile nav height — used for safe-area spacing */
   --bottom-nav-h: 64px;
+  --bnav-h:       64px;   /* alias used in calc() throughout */
   --topbar-h:     56px;
 }
 
@@ -431,6 +432,8 @@ select.form-control { cursor: pointer; }
   overscroll-behavior-y: contain;
   min-height: 0;
   padding: clamp(14px, 4vw, 28px);
+  /* Always leave room below last element — extra on mobile for bottom nav */
+  padding-bottom: calc(var(--bottom-nav-h) + 100px + env(safe-area-inset-bottom, 0px));
 }
 /* Mobile bottom padding handled in .content rule above */
 .page { display: none; }
@@ -982,7 +985,7 @@ canvas.chart-canvas { width: 100% !important; }
 }
 /* Enough room so content doesn't hide behind bottom nav */
 @media(max-width:768px) {
-  .content { padding-bottom: calc(var(--bnav-h) + 48px + env(safe-area-inset-bottom, 0px)) !important; }
+  .content { padding-bottom: calc(var(--bottom-nav-h) + 120px + env(safe-area-inset-bottom, 0px)) !important; }
   .toast-wrap { bottom: calc(var(--bnav-h) + 8px + env(safe-area-inset-bottom, 0px)); }
 }
 
@@ -992,7 +995,7 @@ canvas.chart-canvas { width: 100% !important; }
 ══════════════════════════════════ */
 @media(min-width:769px) and (max-width:1024px) {
   .sidebar { width: 200px; min-width: 200px; }
-  .content { padding-top: 18px; padding-left: 20px; padding-right: 20px; padding-bottom: 40px; }
+  .content { padding-top: 18px; padding-left: 20px; padding-right: 20px; padding-bottom: 60px; }
   .stat-grid { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
   .card { padding: 16px; }
 }
@@ -1003,11 +1006,11 @@ canvas.chart-canvas { width: 100% !important; }
 ══════════════════════════════════ */
 @media(min-width:1025px) {
   .sidebar { width: 240px; min-width: 240px; }
-  .content { padding-top: 28px; padding-left: 32px; padding-right: 32px; padding-bottom: 48px; }
+  .content { padding-top: 28px; padding-left: 32px; padding-right: 32px; padding-bottom: 60px; }
   .page-title { font-size: 1.7rem; }
 }
 @media(min-width:1400px) {
-  .content { padding-top: 32px; padding-left: 40px; padding-right: 40px; padding-bottom: 64px; }
+  .content { padding-top: 32px; padding-left: 40px; padding-right: 40px; padding-bottom: 60px; }
 }
 
 /* ══════════════════════════════════
